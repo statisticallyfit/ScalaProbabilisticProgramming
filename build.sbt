@@ -9,7 +9,7 @@ scalaVersion := "2.13.2"
 
 //For the Kind projector plugin
 resolvers += Resolver.sonatypeRepo("releases")
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+//addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
 
 // ----------------------------------------------------------------------------------
 
@@ -22,13 +22,13 @@ libraryDependencies ++= Seq(
 	//"org.nd4j" % "nd4j-native-platform" % "0.9.1",
 	//"com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
 	//"ch.qos.logback" % "logback-classic" % "1.2.3",
-/*
+	/*
 
-	// Odds dependencies (were unresolved before)
-	"org.scala-lang.virtualized" % "scala-library" % "2.10.2-RC1",
-	"org.scala-lang.virtualized" % "scala-compiler" % "2.10.2-RC1",
-	"org.scala-lang.virtualized" % "scala-reflect" % "2.10.2-RC1",
-*/
+		// Odds dependencies (were unresolved before)
+		"org.scala-lang.virtualized" % "scala-library" % "2.10.2-RC1",
+		"org.scala-lang.virtualized" % "scala-compiler" % "2.10.2-RC1",
+		"org.scala-lang.virtualized" % "scala-reflect" % "2.10.2-RC1",
+	*/
 
 	//Scala Reflections
 	"org.scala-lang" % "scala-reflect" % "2.13.2",
