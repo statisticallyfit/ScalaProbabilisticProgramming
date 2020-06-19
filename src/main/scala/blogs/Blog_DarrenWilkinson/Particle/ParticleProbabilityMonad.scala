@@ -1,4 +1,4 @@
-package Blogs
+package blogs.Blog_DarrenWilkinson.Particle
 
 
 import breeze.stats.{distributions => bdist}

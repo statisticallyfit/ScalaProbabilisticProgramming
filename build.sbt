@@ -176,7 +176,7 @@ lazy val settings =
 		wartremoverSettings ++
 		scalafmtSettings*/
 
-lazy val compilerOptions = Seq(
+	lazy val compilerOptions = Seq(
 	"-deprecation",
 	"-unchecked",
 	"-feature",

@@ -1,4 +1,4 @@
-package Blogs
+package blogs.Blog_DarrenWilkinson.Particle
 
 /**
  *
@@ -142,7 +142,7 @@ object DynamicGLM extends App {
 
 		evolutionVariance <- Gamma(a = 1, b = 1)
 		initialState <- Normal(mu = 0.0, sigmaSq = 2.0)
-		
+
 	} yield (evolutionVariance, List(initialState))
 
 	println(s"prior = $prior")
