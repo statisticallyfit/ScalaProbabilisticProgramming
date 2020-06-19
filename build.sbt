@@ -9,13 +9,16 @@ scalaVersion := "2.13.2"
 
 // PROJECTS
 
+lazy val OddsLibrary = (project in file("lib/OddsLibrary"))
+
+
 // global is the parent project, which aggregates all the other projects
 lazy val global = project
 	.in(file("."))
 	.settings(
 		name := "ScalaProbabilisticProgramming",
 		settings,
-		libraryDependencies ++=commonDependencies ++Seq(
+		libraryDependencies ++= commonDependencies ++ Seq(
 			allDependencies.scalaReflect,
 			allDependencies.scalaCheck,
 			allDependencies.scalaTest,
@@ -39,17 +42,17 @@ lazy val global = project
 	)
 	.aggregate(
 		//common,
-		libraryOdds
+		OddsLibrary
 		//multi2
 		//TODO include other libraries here: bayes-scala... figaro ...
 	)
      .dependsOn(
-		libraryOdds
+		OddsLibrary
 	)
 
 
-lazy val libraryOdds = (project in file("lib/odds"))
-	.settings(
+//lazy val OddsLibrary = (project in file("lib/odds"))
+	/*.settings(
 		name := "odds",
 		settings,
 		//assemblySettings,
@@ -57,7 +60,7 @@ lazy val libraryOdds = (project in file("lib/odds"))
 			/*allDependencies.monocleCore,
 			allDependencies.monocleMacro*/
 		)
-	)/*
+	)
 	.dependsOn(
 
 	)*/
