@@ -9,7 +9,7 @@ scalaVersion := "2.13.2"
 
 // PROJECTS
 
-lazy val OddsLibrary = (project in file("lib/OddsLibrary"))
+//lazy val OddsLibrary = (project in file("lib/OddsLibrary"))
 
 
 // global is the parent project, which aggregates all the other projects
@@ -42,45 +42,13 @@ lazy val global = project
 	)
 	.aggregate(
 		//common,
-		OddsLibrary
+		//OddsLibrary
 		//multi2
 		//TODO include other libraries here: bayes-scala... figaro ...
 	)
      .dependsOn(
-		OddsLibrary
+		//OddsLibrary
 	)
-
-
-//lazy val OddsLibrary = (project in file("lib/odds"))
-	/*.settings(
-		name := "odds",
-		settings,
-		//assemblySettings,
-		libraryDependencies ++= /*commonDependencies ++*/ Seq(
-			/*allDependencies.monocleCore,
-			allDependencies.monocleMacro*/
-		)
-	)
-	.dependsOn(
-
-	)*/
-
-
-
-// This is the common sub-project on which both delivarable "multi1" and "multi2" both depend.
-// Contains code common to all projects.
-/*lazy val common = project
-	.settings(
-		name := "common",
-		settings,
-		libraryDependencies ++= commonDependencies
-	)*/
-
-// Original usage: "deliverable" which can depend on "common" project
-// Current usage: a dependency for the parent project. Using this template since there are dependencies other than
-// common which the Odds library needs.
-
-
 
 
 
@@ -103,6 +71,12 @@ lazy val allDependencies =
 		val versionOfCats = "2.2.0-M3"
 		val versionOfCats_macros = "2.1.1"
 		val versionOfKindProjector = "0.10.3"
+
+		val versionOfFigaro = "5.0.0.0"
+		//val versionOfRainier = "0.3.2"
+		val versionOfRainier = "0.3.0"
+		val versionOfBayesScala = "0.6"
+
 		//------------------
 
 		// Listing the different dependencies
@@ -138,6 +112,19 @@ lazy val allDependencies =
 		// Kind projector plugin
 		// technicalities here = https://github.com/typelevel/kind-projector
 		val kindProjector = compilerPlugin("org.typelevel" %% "kind-projector" % versionOfKindProjector )
+
+		// Probabilistic programming libraries
+		val figaro = "com.cra.figaro" %% "figaro" % versionOfFigaro
+		//val rainier = "com.stripe" %% "rainier-core" % versionOfRainier
+		val rainier_core = "com.stripe" %% "rainier-core" % versionOfRainier
+		val rainier_base ="com.stripe" %% "rainier-base" % versionOfRainier
+		val rainier_compute ="com.stripe" %% "rainier-compute" % versionOfRainier
+		val rainier_plot = "com.stripe" %% "rainier-plot" % "0.2.3"
+		val rainier_cats = "com.stripe" %% "rainier-cats" % "0.2.3"
+		val rainier_sampler = "com.stripe" %% "rainier-sampler" % versionOfRainier
+		val rainier_scalacheck = "com.stripe" %% "rainier-scalacheck" % "0.2.3"
+
+		val bayesScala = "com.github.danielkorzekwa" %% "bayes-scala" % versionOfBayesScala
 	}
 
 
@@ -183,6 +170,8 @@ lazy val commonSettings = Seq(
 	resolvers ++= Seq(
 		//"Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
 		Resolver.sonatypeRepo("releases"),
-		Resolver.sonatypeRepo("snapshots")
+		Resolver.sonatypeRepo("snapshots"),
+		// Resolver for Rainier library
+		Resolver.bintrayRepo("rainier", "maven")
 	)
 )
