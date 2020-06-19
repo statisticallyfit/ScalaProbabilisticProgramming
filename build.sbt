@@ -2,7 +2,7 @@ name := "ScalaProbabilisticProgramming"
 
 version := "0.1"
 
-scalaVersion := "2.13.2"
+scalaVersion := "2.11.0" //"2.13.2"
 
 
 
@@ -19,7 +19,10 @@ lazy val global = project
 		name := "ScalaProbabilisticProgramming",
 		settings,
 		libraryDependencies ++= commonDependencies ++ Seq(
+			allDependencies.scalaLibrary,
+			allDependencies.scalaCompiler,
 			allDependencies.scalaReflect,
+
 			allDependencies.scalaCheck,
 			allDependencies.scalaTest,
 			allDependencies.specs2Core,
@@ -37,7 +40,20 @@ lazy val global = project
 			allDependencies.cats_free,
 			allDependencies.cats_macros,
 			allDependencies.cats_testkit,
-			allDependencies.kindProjector
+			allDependencies.kindProjector,
+
+			allDependencies.breeze,
+			allDependencies.breeze_natives,
+			allDependencies.figaro,
+			allDependencies.rainier_core,
+			allDependencies.rainier_base,
+			allDependencies.rainier_compute,
+			allDependencies.rainier_plot,
+			allDependencies.rainier_cats,
+			allDependencies.rainier_sampler,
+			allDependencies.rainier_scalacheck,
+			allDependencies.evilplot,
+			allDependencies.bayesScala
 		)
 	)
 	.aggregate(
@@ -59,7 +75,7 @@ lazy val allDependencies =
 	new {
 
 		// Listing the versions as values
-		val versionOfScalaReflect = "2.13.2"
+		val versionOfScala = "2.11.0" //"2.13.2"
 		val versionOfScalaTest = "3.3.0-SNAP2"
 		val versionOfScalaCheck = "1.14.3"
 		val versionOfSpecs2 = "4.9.4"
@@ -67,21 +83,24 @@ lazy val allDependencies =
 		val versionOfDiscipline_scalatest = "1.0.1"
 		val versionOfDiscipline_specs2 = "1.1.0"
 		val versionOfSpire = "0.17.0-M1"
-		val versionOfAlgebra = "2.0.1"
-		val versionOfCats = "2.2.0-M3"
+		val versionOfAlgebra =  "2.0.0" //"2.0.1"
+		val versionOfCats = "2.0.0" // "2.2.0-M3"
 		val versionOfCats_macros = "2.1.1"
 		val versionOfKindProjector = "0.10.3"
 
 		val versionOfFigaro = "5.0.0.0"
 		//val versionOfRainier = "0.3.2"
 		val versionOfRainier = "0.3.0"
-		val versionOfBayesScala = "0.6"
+		val versionOfEvilPlot = "0.6.0"
+		val versionOfBayesScala = "0.6" // "0.7-SNAPSHOT"
+		val versionOfBreeze = "1.0-RC4"
 
 		//------------------
 
 		// Listing the different dependencies
-
-		val scalaReflect = "org.scala-lang" % "scala-reflect" % versionOfScalaReflect
+		val scalaLibrary = "org.scala-lang" % "scala-library" % versionOfScala
+		val scalaCompiler = "org.scala-lang" % "scala-compiler" % versionOfScala
+		val scalaReflect = "org.scala-lang" % "scala-reflect" % versionOfScala
 
 		val scalaTest = "org.scalatest" %% "scalatest" % versionOfScalaTest % Test
 
@@ -104,7 +123,7 @@ lazy val allDependencies =
 		val cats_kernel = "org.typelevel" %% "cats-kernel" % versionOfCats
 		val cats_laws = "org.typelevel" %% "cats-laws" % versionOfCats % Test
 		val cats_free = "org.typelevel" %% "cats-free" % versionOfCats
-		val cats_macros = "org.typelevel" %% "cats-macros" % versionOfCats_macros
+		val cats_macros = "org.typelevel" %% "cats-macros" % versionOfCats //versionOfCats_macros
 		val cats_testkit = "org.typelevel" %% "cats-testkit" % versionOfCats % Test
 
 		//Shapeless ...
@@ -124,7 +143,12 @@ lazy val allDependencies =
 		val rainier_sampler = "com.stripe" %% "rainier-sampler" % versionOfRainier
 		val rainier_scalacheck = "com.stripe" %% "rainier-scalacheck" % "0.2.3"
 
+		val evilplot = "com.cibo" %% "evilplot" % versionOfEvilPlot
+
 		val bayesScala = "com.github.danielkorzekwa" %% "bayes-scala" % versionOfBayesScala
+
+		val breeze = "org.scalanlp" %% "breeze" % versionOfBreeze
+		val breeze_natives = "org.scalanlp" %% "breeze-natives" % versionOfBreeze
 	}
 
 
@@ -159,8 +183,8 @@ lazy val compilerOptions = Seq(
 	"-language:existentials",
 	"-language:higherKinds",
 	"-language:implicitConversions",
-	"-language:postfixOps",
-	"-Ypartial-unification"
+	"-language:postfixOps"
+	//"-Ypartial-unification" //todo got error in sbt compilation " error: bad option" why?
 	//"-encoding",
 	//"utf8"
 )
@@ -172,6 +196,8 @@ lazy val commonSettings = Seq(
 		Resolver.sonatypeRepo("releases"),
 		Resolver.sonatypeRepo("snapshots"),
 		// Resolver for Rainier library
-		Resolver.bintrayRepo("rainier", "maven")
+		Resolver.bintrayRepo("rainier", "maven"),
+		// Resolver for evilplot (dependency of Rainier)
+		Resolver.bintrayRepo("cibotech", "public")
 	)
 )
