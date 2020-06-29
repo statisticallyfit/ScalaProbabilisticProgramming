@@ -1,4 +1,4 @@
-package blogs.Blog_DarrenWilkinson.Particle
+package ProbabilityMonads.Particle
 
 /**
  *
@@ -167,7 +167,7 @@ object DynamicGLM extends App {
 	// The seed of foldleft is the prior
 	// note: TYPE SIGNATURE: foldLeft(z: B)(f: (B, A) => B)
 	val mod: Prob[(Double, List[Double])] =
-		data.foldLeft(prior)((accTuple, newObs) => addTimePoint(accTuple, newObs))
+	data.foldLeft(prior)((accTuple, newObs) => addTimePoint(accTuple, newObs))
 
 	val modEmpirical: Vector[(Double, List[Double])] = mod.empirical
 
