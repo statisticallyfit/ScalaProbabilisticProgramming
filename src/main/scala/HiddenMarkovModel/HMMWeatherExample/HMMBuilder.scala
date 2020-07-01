@@ -5,13 +5,13 @@ package HiddenMarkovModel.HMMWeatherExample
 import com.cra.figaro.language._
 
 
-import Types._
+import HMMTypes._
 
 
 /**
  * Tutorial source = https://github.com/mioalter/fp-scala/blob/master/hmm-example/code/src/main/scala/hmm/hmm.scala
  */
-object HMMInfo {
+object HMMBuilder {
 
 
 	//The Figaro sampling needs this information
@@ -87,15 +87,16 @@ object HMMInfo {
 	 * @param aprioriArray
 	 * @return
 	 */
-	def makeHiddenSequence(length: Int, transitionMatrix: Element[H] => Element[H],
+	def makeHiddenSequence(length: Int,
+					   transitionMatrix: Element[H] => Element[H],
 					   aprioriArray: Array[Double]) : List[Element[H]] = {
 
 
 		//Creating the apriori distribution over hidden states.
-		val aprioriDist = Select(
+		val aprioriDist: Element[H] = Select(
 			aprioriArray(0) -> Rainy,
 			aprioriArray(1) -> Sunny
-		)
+		) // note Element[H] is some kind of supertype of /*AtomicSelect[HiddenState]*/
 
 
 		def buildSequence(n: Int, elems: List[Element[H]]): List[Element[H]] = {
@@ -110,7 +111,93 @@ object HMMInfo {
 		}
 
 		// reverse the result of hidden states so time increases from left to right
-		buildSequence(length, Nil).reverse 
+		buildSequence(length, Nil).reverse
 	}
 
+
+	/**
+	 * Makes the sequence of observable states that are corresponding to the sequence of the hidden States.
+	 * Created by just applying the emission matrix to each hidden state.
+	 *
+	 * @param hiddenSequence
+	 * @param emissionMatrix
+	 * @return
+	 */
+	def makeObservableSequence(hiddenSequence: List[Element[H]],
+						  emissionMatrix: Element[H] => Element[O]): List[Element[O]] = {
+
+		hiddenSequence.map(h => emissionMatrix(h))
+	}
+
+
+	/**
+	 * Putting the above information into a class and companion object to make an HMM with given or
+	 * default parameters
+	 */
+	class HiddenMarkovModel(val length: Int
+					    , val aprioriDist: Array[Double]
+					    , val rainyTransmission: Array[Double]
+					    , val sunnyTransmission: Array[Double]
+					    , val rainyEmission: Array[Double]
+					    , val sunnyEmission: Array[Double]
+					   ) {
+
+		//TODO call this hiddenSeq or hiddenState? are these hidden STATES? original or after??
+
+		val hidden: List[Element[H]] =
+
+			makeHiddenSequence(
+				length = length,
+				transitionMatrix = transition(rainyTransmission, sunnyTransmission),
+				aprioriArray = aprioriDist
+			)
+
+
+		val observable: List[Element[O]] =
+
+			makeObservableSequence(
+				hiddenSequence = hidden,
+				emissionMatrix = emission(rainyEmission, sunnyEmission)
+			)
+
+
+	}
+
+
+	object HiddenMarkovModel {
+
+		val aprioriDist: Array[Double] = Array(0.4, 0.6)
+		val rainyTransmission: Array[Double] = Array(0.6, 0.4)
+		val sunnyTransmission: Array[Double] = Array(0.3, 0.7)
+		val rainyEmission: Array[Double] = Array(0.2, 0.7, 0.1)
+		val sunnyEmission: Array[Double] = Array(0.4, 0.1, 0.5)
+
+
+		def apply(length: Int): HiddenMarkovModel =
+
+			new HiddenMarkovModel(
+				length,
+				aprioriDist,
+				rainyTransmission,
+				sunnyTransmission,
+				rainyEmission,
+				sunnyEmission
+			)
+
+		def apply(length: Int,
+				aprioriDist: Array[Double],
+				rainyTransmission: Array[Double],
+				sunnyTransmission: Array[Double],
+				rainyEmission: Array[Double],
+				sunnyEmission: Array[Double]): HiddenMarkovModel =
+
+			new HiddenMarkovModel(
+				length,
+				aprioriDist,
+				rainyTransmission,
+				sunnyTransmission,
+				rainyEmission,
+				sunnyEmission
+			)
+	}
 }

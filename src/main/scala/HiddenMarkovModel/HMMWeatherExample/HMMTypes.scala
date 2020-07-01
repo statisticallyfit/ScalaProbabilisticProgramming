@@ -3,7 +3,7 @@ package HiddenMarkovModel.HMMWeatherExample
 /**
  * Tutorial source = https://mioalter.wordpress.com/2016/02/13/hmm-hidden-markov-models-with-figaro/
  */
-object Types {
+object HMMTypes {
 
 	sealed trait HiddenState
 	case object Rainy extends HiddenState
