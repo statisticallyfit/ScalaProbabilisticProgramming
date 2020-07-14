@@ -28,8 +28,8 @@ lazy val global = project
 			allDependencies.specs2Core,
 			allDependencies.specs2ScalaCheck,
 			allDependencies.discipline_core,
-			allDependencies.discipline_scalatest,
-			allDependencies.discipline_specs2,
+			//allDependencies.discipline_scalatest,
+			//allDependencies.discipline_specs2,
 			allDependencies.spire,
 			allDependencies.spire_laws,
 			allDependencies.algebra,
@@ -76,7 +76,7 @@ lazy val allDependencies =
 
 		// Listing the versions as values
 		val versionOfScala = "2.11.0" //"2.13.2"
-		val versionOfScalaTest = "3.3.0-SNAP2"
+		val versionOfScalaTest = "3.2.0" //"3.3.0-SNAP2"
 		val versionOfScalaCheck = "1.14.3"
 		val versionOfSpecs2 = "4.9.4"
 		val versionOfDiscipline_core = "1.0.2"
