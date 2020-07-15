@@ -12,7 +12,7 @@ import org.scalactic.TripleEquals._
 import org.scalactic.Tolerance._
 
 /**
- *
+ * Source: from Avi Pfeffer book
  */
 object Listing_8_1_MarkovChainSoccer extends App {
 
