@@ -1,6 +1,3 @@
-logLevel := Level.Warn
 
-
-//TODO way to call the `versionOfKindProjector` value here, from build.sbt?
-
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+// partial unification plugin for older scala
+addSbtPlugin("org.lyranthe.sbt" % "partial-unification" % "1.1.0")

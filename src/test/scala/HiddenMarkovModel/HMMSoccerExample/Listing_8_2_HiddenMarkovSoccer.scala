@@ -1,19 +1,12 @@
-package HiddenMarkovModel
-
-
+package HiddenMarkovModel.HMMSoccerExample
 
 import com.cra.figaro.algorithm.factored.VariableElimination
-import com.cra.figaro.language._
+import com.cra.figaro.language.{Constant, Element, Flip}
 import com.cra.figaro.library.compound.If
-
 
 
 import org.scalactic.TripleEquals._
 import org.scalactic.Tolerance._
-
-/**
- * Source: from Avi Pfeffer book
- */
 
 /**
  * (key concept) hidden markov model (HMM) = https://synergo.atlassian.net/wiki/spaces/KnowRes/pages/34407064/hidden+Markov+model+HMM

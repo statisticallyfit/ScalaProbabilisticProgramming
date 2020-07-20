@@ -84,15 +84,24 @@ object Listing_8_1_MarkovChainSoccer extends App {
 	println(VariableElimination.probability(possessionVar(5), true))
 
 
+
+	// ---------------------------------------------------------------------------------------------------------------------------
+	//import org.specs2.mutable._
+	import org.scalacheck.Arbitrary
+
+
+	//Recording the prior probability of havging possession at time step 5
+	var priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+	println(s"\nPrior probability of possession at time t = 5:  \t $priorProb")
+
 	{
 		/**
-		 * Example 2 of Markov Assumption: (subtle)
+		 * Example of Markov Assumption for Non-Immediate Past
 		 *
 		 * Possession at any time point (5) depends only on possession at time step (4) and is independent of
 		 * possessions at previous time points.
 		 */
-		//Recording the prior probability of havging possession at time step 5
-		var priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+
 
 		//Setting an earlier, not directly previous, state
 		possessionVar(3).observe(true)
@@ -108,8 +117,10 @@ object Listing_8_1_MarkovChainSoccer extends App {
 		assert(priorProb != probAfter2, "Test 1 Markov: prior probability of possession at time step 5 need not equal " +
 			"probability of possession at time step 5 after observing possession at time step 2")
 
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 2: $probAfter2")
-		println(s"Probability of possession at t = 5 after observing possession at t = 2, 3: $probAfter3")
+
+		println(s"\nProbability of possession at t = 5 after observing possession at t = 2: \t $probAfter2")
+		println(s"Probability of possession at t = 5 after observing possession at t = 2, 3: \t $probAfter3")
+
 
 		assert(probAfter3 === probAfter2 +- 0.00000000001, "Test (past) Markov Assumption: probability of possession at " +
 			"time step 5 is not affected by whether possession occurred at previous time steps")
@@ -117,12 +128,9 @@ object Listing_8_1_MarkovChainSoccer extends App {
 
 
 
-	//possessionVar(2).unobserve()
-	//possessionVar(3).unobserve() // cleaning up state for this test below
-
 	{
 		/**
-		 * Example 2 of Markov Assumption:
+		 * Example of Markov Assumption for Immediate Past
 		 *
 		 * Possession true for two previous time steps in a row --- same probability of possession for time step 5
 		 * because the new observation hasn't change the probability.
@@ -130,7 +138,7 @@ object Listing_8_1_MarkovChainSoccer extends App {
 		 * earlier states (3, 4) given the directly previous state (4) )
 		 */
 
-		val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+
 		// Setting possession at time steps 3 and 4.
 		possessionVar(4).observe(true)
 		val probAfter4: Double = VariableElimination.probability(possessionVar(5), true)
@@ -138,8 +146,8 @@ object Listing_8_1_MarkovChainSoccer extends App {
 		possessionVar(3).observe(true)
 		val probAfter3_edgeCase = VariableElimination.probability(possessionVar(5), true)
 
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 3: $probAfter3_edgeCase")
-		println(s"Probability of possession at t = 5 after observing possession at t = 3, 4: $probAfter4")
+		println(s"\nProbability of possession at t = 5 after observing possession at t = 3: \t $probAfter3_edgeCase")
+		println(s"Probability of possession at t = 5 after observing possession at t = 3, 4: \t $probAfter4")
 
 		assert(probAfter4 === probAfter3_edgeCase +- 0.000000000001, "Test (past) Markov Assumption")
 	}
@@ -152,7 +160,7 @@ object Listing_8_1_MarkovChainSoccer extends App {
 
 	{
 		/**
-		 * Example 3 markov assumption
+		 * Example of Markov Assumption for Future
 		 *
 		 * Whether you had possession in minute 7 adds no new information to possession at minute 5 after minute 6 is
 		 * known.
@@ -166,8 +174,8 @@ object Listing_8_1_MarkovChainSoccer extends App {
 		possessionVar(7).observe(true)
 		val probAfter7: Double = VariableElimination.probability(possessionVar(5), true)
 
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 6: $probAfter6")
-		println(s"Probability of possession at t = 5 after observing possession at t = 6, 7: $probAfter7")
+		println(s"\nProbability of possession at t = 5 after observing possession at t = 6: \t $probAfter6")
+		println(s"Probability of possession at t = 5 after observing possession at t = 6, 7: \t $probAfter7")
 
 		assert(probAfter6 === probAfter7 +- 0.000000000001, "Test (future) markov assumption")
 	}
