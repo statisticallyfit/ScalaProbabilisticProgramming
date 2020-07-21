@@ -6,28 +6,33 @@ import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
 
 
+import org.scalatest._
+import org.scalatest.featurespec.AnyFeatureSpec
 
-import org.scalactic.TripleEquals._
+//import org.scalatest.matchers.should.Matchers._
+//import org.scalactic.TypeCheckedTripleEquals._
 import org.scalactic.Tolerance._
 
-import org.specs2.mutable._
+//import org.specs2.mutable._
 
 
-class MarkovChainTests extends Specification {
 
+
+object MarkovChainSoccerState {
 
 
 	import Listing_8_1_MarkovChainSoccer._
 
 	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
 
-	final val FIVE: Int = 5
-	final val FOUR: Int = 4
+	final val FIVE = 5
+	final val FOUR = 4
 	final val THREE: Int = 3
 	final val TWO: Int = 2
 	final val SIX: Int = 6
 	final val SEVEN: Int = 7
 
+	final val TOLERANCE: Double = 0.00000001
 	//---------------------------------------------------------------------------------------------------------------------
 
 	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
@@ -69,49 +74,103 @@ class MarkovChainTests extends Specification {
 
 
 	// ---------------------------------------------------------------------------------------------------------------------------
-	//import org.specs2.mutable._
-	import org.scalacheck.Arbitrary
+
+
 
 
 	//Recording the prior probability of havging possession at time step 5
-	var priorProb: Double = VariableElimination.probability(possessionVar(5), true)
-	println(s"\nPrior probability of possession at time t = 5:  \t $priorProb")
 
-	{
-		/**
-		 * Example of Markov Assumption for Non-Immediate Past
-		 *
-		 * Possession at any time point (5) depends only on possession at time step (4) and is independent of
-		 * possessions at previous time points.
-		 */
+//TODO print prior prob
+	//println(s"\nPrior probability of possession at time t = $FIVE:  \t $priorProb")
+
+}
 
 
-		//Setting an earlier, not directly previous, state
-		possessionVar(3).observe(true)
-		val probAfter3: Double = VariableElimination.probability(possessionVar(5), true)
 
-		possessionVar(2).observe(false)
-		val probAfter2: Double = VariableElimination.probability(possessionVar(5), true)
+class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenThen {
+
+	import MarkovChainSoccerState._
 
 
-		assert(priorProb != probAfter3, "Test 1 Markov: prior probability of possession at time step 5 need not equal " +
-			"probability of possession at time step 5 after observing possession at time step 3")
 
-		assert(priorProb != probAfter2, "Test 1 Markov: prior probability of possession at time step 5 need not equal " +
-			"probability of possession at time step 5 after observing possession at time step 2")
-
-
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 2: \t $probAfter2")
-		println(s"Probability of possession at t = 5 after observing possession at t = 2, 3: \t $probAfter3")
+	info("Markov Assumption Test for Non-Immediate Past: ")
+	info("Possession at current time t = 5")
+	info("depends only on")
+	info("possession at previous time point 4")
+	info("and is independent of possessions at previous times.")
 
 
-		assert(probAfter3 === probAfter2 +- 0.00000000001, "Test (past) Markov Assumption: probability of possession at " +
-			"time step 5 is not affected by whether possession occurred at previous time steps")
+
+	Feature("How Markov Assumption Doesn't Apply for Non-Immediate Past") {
+
+		Scenario("Observe possession at t = 2 (three steps behind current time t = 5)"){
+
+			Given("no current observed ball possession at t = 5")
+			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+			//assert()
+
+			When("ball is possessed at t = 2")
+			possessionVar(2).observe(true)
+			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Then("Markov assumption doesn't apply; the probability of possession at t = 5 differs from prior " +
+				"probability of possession at t = 5")
+			assert(possessProbTWO != priorProb)
+
+			Console.println(s"\nProbability of possession at t = 5 after observing possession at t = 2: \t " +
+				s"$possessProbTWO");
+		}
+
+
+		Scenario("Observe possession at t = 2 and t = 3 (two steps behind current time t = 5)") {
+
+			Given("no current observed ball possession at t = 5")
+			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+			//assert()
+
+			When("ball is possessed at t = 2, and then also at t = 3")
+			possessionVar(2).observe(true)
+			possessionVar(3).observe(true)
+			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Then("Markov assumption doesn't apply; the probability of possession at t = 5 differs from prior " +
+				"probability of possession at t = 5")
+			assert(possessProbTHREE != priorProb)
+
+			println(s"Probability of possession at t = 5 after observing possession at t = 2, 3: \t " +
+				s"$possessProbTHREE")
+
+		}
+
+		Scenario("Compare possessions at t = 2, and t = 3 (two time steps behind current time t = 5)"){
+			Given("no current observed ball possession at t = 5")
+			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+			//assert()
+
+			When("ball is possessed at t = 2, and then also at t = 3")
+			possessionVar(2).observe(true)
+			possessionVar(3).observe(true)
+
+			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
+			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+
+			Then("Markov assumption applies for those consecutive time steps; probability of possession at t = 5 " +
+				"after observing possession at t = 2 and t = 3 should be equal")
+			assert(possessProbTWO === (possessProbTHREE +- TOLERANCE))
+		}
+
+
 	}
 
 
 
-	{
+
+
+	/*{
 		/**
 		 * Example of Markov Assumption for Immediate Past
 		 *
@@ -161,5 +220,5 @@ class MarkovChainTests extends Specification {
 		println(s"Probability of possession at t = 5 after observing possession at t = 6, 7: \t $probAfter7")
 
 		assert(probAfter6 === probAfter7 +- 0.000000000001, "Test (future) markov assumption")
-	}
+	}*/
 }
