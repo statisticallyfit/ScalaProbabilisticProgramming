@@ -23,6 +23,7 @@ lazy val global = project
 			allDependencies.scalaLibrary,
 			allDependencies.scalaCompiler,
 			allDependencies.scalaReflect,
+			allDependencies.scalactic,
 
 			allDependencies.scalaCheck,
 
@@ -90,6 +91,8 @@ lazy val allDependencies =
 		// Listing the versions as values
 		val versionOfScala = "2.11.11" //"2.13.2"
 
+		val versionOfScalactic = "3.2.0"
+
 		val versionOfScalaTest = "3.2.0" //"3.3.0-SNAP2"
 
 		val versionOfScalaCheck = "1.14.3"
@@ -126,6 +129,9 @@ lazy val allDependencies =
 		val scalaLibrary = "org.scala-lang" % "scala-library" % versionOfScala
 		val scalaCompiler = "org.scala-lang" % "scala-compiler" % versionOfScala
 		val scalaReflect = "org.scala-lang" % "scala-reflect" % versionOfScala
+
+
+		val scalactic = "org.scalactic" %% "scalactic" % versionOfScalactic
 
 		val scalaTest = "org.scalatest" %% "scalatest" % versionOfScalaTest % Test
 

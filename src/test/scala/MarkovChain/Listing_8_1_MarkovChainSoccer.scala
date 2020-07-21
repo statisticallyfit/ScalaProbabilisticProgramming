@@ -4,48 +4,31 @@ package MarkovChain
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
-import com.cra.figaro.library.compound.If
 
 
 
 import org.scalactic.TripleEquals._
 import org.scalactic.Tolerance._
 
-/**
- * Source: from Avi Pfeffer book
- */
-object Listing_8_1_MarkovChainSoccer extends App {
-
-	// Length of the chain in time steps
-	val chainTimeStepLength: Int = 90
+import org.specs2.mutable._
 
 
-	/**
-	 * (key concept) Markov Chain = https://synergo.atlassian.net/wiki/spaces/KnowRes/pages/2028044306/Markov+model
-	 */
-	// The boolean state variable Possession, which has time states, and indicates whether your team has possession
-	// of the soccer ball, for ever ytime point from 0 through 89.
-	val possessionVar: Array[Element[Boolean]] = Array.fill(chainTimeStepLength)(Constant(false))
-
-	// Sets the distribution of the initial state of the sequence.
-	// Distribution over whether your team has possession at time point 0.
-	possessionVar(0) = Flip(0.5)
-
-
-	/**
-	 * (key concept) transition model = https://synergo.atlassian.net/wiki/spaces/KnowRes/pages/2016641067/transition+model
-	 */
-	//Transition model defining a distribution for each state variable based on the value of the previous state
-	// variable in the sequence of the Markov chain.
-	// If you did have possession at previous time point, you continue at next time step to have it with probability
-	// 0.6, but if you  didn't have possession, you have possession at next time step only with a lower probability of 0.3
-	for { minute <- 1 until chainTimeStepLength}{
-		possessionVar(minute) = If(test = possessionVar(minute - 1), thn = Flip(0.6), els = Flip(0.3))
-	}
+class MarkovChainTests extends Specification {
 
 
 
-	// ------------------------------------------------------------------------------------------------------------------------------
+	import Listing_8_1_MarkovChainSoccer._
+
+	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+
+	final val FIVE: Int = 5
+	final val FOUR: Int = 4
+	final val THREE: Int = 3
+	final val TWO: Int = 2
+	final val SIX: Int = 6
+	final val SEVEN: Int = 7
+
+	//---------------------------------------------------------------------------------------------------------------------
 
 	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
 	// any time point, given observations at any time points.
