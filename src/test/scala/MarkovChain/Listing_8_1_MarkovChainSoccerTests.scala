@@ -118,8 +118,9 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 				"probability of possession at t = 5")
 			assert(possessProbTWO != priorProb)
 
-			Console.println(s"\nProbability of possession at t = 5 after observing possession at t = 2: \t " +
-				s"$possessProbTWO");
+			Console.println(s"\n(F1, S1) Prior probability of possession at t = 5: \t $priorProb")
+			Console.println(s"(F1, S1) Probability of possession at t = 5 after observing possession at t = 2: \t " +
+				s"$possessProbTWO")
 		}
 
 
@@ -129,8 +130,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
 			//assert()
 
-			When("ball is possessed at t = 2, and then also at t = 3")
-			possessionVar(2).observe(true)
+			When("ball is possessed at t = 3")
 			possessionVar(3).observe(true)
 			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -139,28 +139,33 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 				"probability of possession at t = 5")
 			assert(possessProbTHREE != priorProb)
 
-			println(s"Probability of possession at t = 5 after observing possession at t = 2, 3: \t " +
-				s"$possessProbTHREE")
+			Console.println(s"\n(F1, S2) Prior probability of possession at t = 5: \t $priorProb")
+			Console.println(s"(F1, S2) Probability of possession at t = 5 after observing possession at t = " +
+				s"3: \t$possessProbTHREE")
 
 		}
 
 		Scenario("Compare possessions at t = 2, and t = 3 (two time steps behind current time t = 5)"){
 			Given("no current observed ball possession at t = 5")
-			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
-			//assert()
 
 			When("ball is possessed at t = 2, and then also at t = 3")
 			possessionVar(2).observe(true)
-			possessionVar(3).observe(true)
-
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
+
+			possessionVar(3).observe(true)
 			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
 
 
 
-			Then("Markov assumption applies for those consecutive time steps; probability of possession at t = 5 " +
-				"after observing possession at t = 2 and t = 3 should be equal")
+			Then("Markov assumption applies for those consecutive time steps; probability of possession at t = 5" +
+				" after observing possession at t = 2 and t = 3 should be equal")
 			assert(possessProbTWO === (possessProbTHREE +- TOLERANCE))
+
+			Console.println(s"\n(F1, S3) Probability of possession at t = 5 after observing possession at t = " +
+				s"2: \t $possessProbTWO")
+			Console.println(s"(F1, S3) Probability of possession at t = 5 after observing possession at t = 2, and" +
+				s" t = " +
+				s"3: \t$possessProbTHREE")
 		}
 
 
@@ -170,35 +175,83 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 
-	/*{
-		/**
-		 * Example of Markov Assumption for Immediate Past
-		 *
-		 * Possession true for two previous time steps in a row --- same probability of possession for time step 5
-		 * because the new observation hasn't change the probability.
-		 * This is due to the Markov Assumption (the state at any time point (5) is conditionally independent of all
-		 * earlier states (3, 4) given the directly previous state (4) )
-		 */
+	info("Markov Assumption Test for Immediate Past: ")
+	info("Possession at current time t = 5")
+	info("depends only on")
+	info("possession at previous time point 4")
+	info("and is independent of possessions at previous times.")
 
 
-		// Setting possession at time steps 3 and 4.
-		possessionVar(4).observe(true)
-		val probAfter4: Double = VariableElimination.probability(possessionVar(5), true)
+	Feature("How Markov Assumption Applies for Immediate Past: the state at any time point is conditionally " +
+		"independent of all earlier states given the directly previous state") {
 
-		possessionVar(3).observe(true)
-		val probAfter3_edgeCase = VariableElimination.probability(possessionVar(5), true)
 
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 3: \t $probAfter3_edgeCase")
-		println(s"Probability of possession at t = 5 after observing possession at t = 3, 4: \t $probAfter4")
 
-		assert(probAfter4 === probAfter3_edgeCase +- 0.000000000001, "Test (past) Markov Assumption")
+		Scenario("Observe possession at t = 3 (two steps behind current time t = 5)"){
+			Given("no current observed ball possession at t = 5")
+			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			When("ball is possessed at t = 3")
+			possessionVar(3).observe(true)
+			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Then("Markov assumption doesn't apply; the probability of possession at t = 5 (after observing " +
+				"possession at t = 3) differs from prior probability of possession at t = 5")
+			//assert(priorProb != possessProbTHREE)
+			Console.println(s"\n(F2, S1) Prior probability of possession at t = 5: \t $priorProb")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 after observing possession at t = 3: \t " +
+				s"$possessProbTHREE")
+		}
+
+		Scenario("Observe possession at t = 4 (two steps behind current time t = 5)"){
+			Given("no current observed ball possession at t = 5")
+			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			When("ball is possessed at t = 4")
+			possessionVar(4).observe(true)
+			val possessProbFOUR: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Then("Markov assumption doesn't apply; the probability of possession at t = 5 (after observing " +
+				"possession at t = 4) differs from prior probability of possession at t = 5")
+			//assert(priorProb != possessProbFOUR)
+			Console.println(s"\n(F2, S2) Prior probability of possession at t = 5: \t $priorProb")
+			Console.println(s"(F2, S2) Probability of possession at t = 5 after observing possession at t = 4: \t " +
+				s"$possessProbFOUR")
+		}
+
+
+		Scenario("Compare possessions at t = 5 after observing possession at t = 3, 4 (immediately behind current " +
+			"time t = 5)"){
+
+			Given("no current observed ball possession at t = 5")
+
+			When("ball is possessed at t = 4 and then t = 3")
+			possessionVar(4).observe(true)
+			val possessProbFOUR: Double = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(3).observe(true)
+			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Then("Markov assumption applies; the probability of possession at t = 5 equals prior " +
+				"probability of possession at t = 5")
+			//assert(possessProbTHREE === (possessProbFOUR +- TOLERANCE))
+
+			Console.println(s"\n(F2, S3) Probability of possession at t = 5 after observing possession at t = " +
+				s"3: \t $possessProbTHREE")
+			Console.println(s"(F2, S3) Probability of possession at t = 5 after observing possession at t = 3, " +
+				s"4: \t $possessProbFOUR")
+		}
+
+
 	}
 
 
-
-
 	/*possessionVar(4).unobserve()
-	possessionVar(3).unobserve() */// cleaning up state for this test below
+	possessionVar(3).unobserve()
 
 	{
 		/**
