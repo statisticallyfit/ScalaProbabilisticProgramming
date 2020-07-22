@@ -23,7 +23,7 @@ object MarkovChainSoccerState {
 
 	import Listing_8_1_MarkovChainSoccer._
 
-	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+	var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
 
 	final val FIVE = 5
 	final val FOUR = 4
@@ -33,6 +33,28 @@ object MarkovChainSoccerState {
 	final val SEVEN: Int = 7
 
 	final val TOLERANCE: Double = 0.00000001
+
+
+	/**
+	 * Given a markov chain, this function resets the state given the limit or time step
+	 * @param variable
+	 * @param TIME_STEP_LIMIT
+	 * @return
+	 */
+	def resetChain(variable: Array[Element[Boolean]], TIME_STEP_LIMIT: Int = 10) = {
+		(0 until TIME_STEP_LIMIT).map(num => variable(num).unobserve())
+
+		variable
+	}
+
+	/**
+	 * Simple check to see if the given elements are all distinct or not
+	 * @param elements
+	 * @return
+	 */
+	def allDifferent(elements: Double*): Boolean = {
+		List(elements).distinct.length == List(elements).length
+	}
 	//---------------------------------------------------------------------------------------------------------------------
 
 	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
@@ -93,7 +115,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 
-	info("Markov Assumption Test for Non-Immediate Past: ")
+	/*info("Markov Assumption Test for Non-Immediate Past: ")
 	info("Possession at current time t = 5")
 	info("depends only on")
 	info("possession at previous time point 4")
@@ -169,7 +191,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 		}
 
 
-	}
+	}*/
 
 
 
@@ -182,23 +204,30 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 	info("and is independent of possessions at previous times.")
 
 
-	Feature("How Markov Assumption Operates in Immediate Past: the state at any time point is conditionally " +
-		"independent of all earlier states given the directly previous state") {
+	//How Markov Assumption Operates in Immediate Past: the state at any time point is conditionally " +
+	//		"independent of all earlier states given the directly previous state
+	Feature("Test 2") {
 
-		Scenario("") {
+		// INDEPENDENT + NOT FOUR
+		Scenario("S1") {
+			possessionVar = resetChain(possessionVar, TIME_STEP_LIMIT = 5)
 
-			Given("observe no ball possession at t = 4")
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Given("observe ball possession at t = 4")
+			possessionVar(4).observe(true)
+			val possessProbFOUR: Double = VariableElimination.probability(possessionVar(5), true)
 
 
 			When("observe ball possession SEPERATELY at earlier times (t = 3, 2, 1 ...) other than immediately " +
 				"preceding time t = 4")
 
-			possessionVar(3).observe(false)
+			possessionVar(3).observe(true)
 			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(3).unobserve()
 
-			possessionVar(2).observe(true)
+			possessionVar(2).observe(false)
 			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(2).unobserve()
 
@@ -214,31 +243,110 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the prior probability of possession")
 
-			assert(possessProbPrior === (0.48 +- TOLERANCE))
+			assert(possessProbFOUR === (0.6 +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observe possession at t = 4")
+
+			assert(possessProbTHREE === (0.6 +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 3,4")
+
+			assert(possessProbTWO === (0.6 +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 2,4")
+
+			assert(possessProbONE === (0.6 +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 1,4")
+
+			assert(possessProbZERO === (0.6 +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0,4")
 
 
-			assert(possessProbTHREE === (possessProbPrior +- TOLERANCE),
-				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 3")
 
-			assert(possessProbTWO === (possessProbPrior +- TOLERANCE),
-				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 2, 3")
-
-			assert(possessProbONE === (possessProbPrior +- TOLERANCE),
-				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 1, 2, 3")
-
-			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
-				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")
-
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3: \t " +
+			Console.println(s"\n(F2, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 4: \t " +
+				s"$possessProbFOUR")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3,4: \t " +
 				s"$possessProbTHREE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2: \t " +
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2,4: \t " +
 				s"$possessProbTWO")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1: \t " +
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1,4: \t " +
 				s"$possessProbONE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0: \t " +
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0,4: \t " +
 				s"$possessProbZERO")
 		}
 
+		/**
+		 * "Markov assumption doesn't apply: " +
+		 * "the probabilities of possession after the new observations, given no observation at immediately " +
+		 * "preceding time t = 4, are not different than the prior probability of possession. " +
+		 * "So the probability " +
+		 * "of possession at t = 5 from earlier are not independent from prior probability of possession at t = " +
+		 * "5."
+		 */
+		// INDEPENDENT + NOT FOUR
+		Scenario("Markov Assumption doesn't apply: " +
+			"Probabilities of possession at t = 5, given no observation at t = 4, and having observations of " +
+			"possession at earlier times") {
+
+			possessionVar = resetChain(possessionVar, TIME_STEP_LIMIT = 5)
+
+			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			Given("observe no ball possession at t = 4")
+
+
+
+			When("observe ball possession SEPERATELY at earlier times (t = 3, 2, 1 ...) other than immediately " +
+				"preceding time t = 4")
+
+			possessionVar(3).observe(true)
+			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(3).unobserve()
+
+			possessionVar(2).observe(false)
+			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(2).unobserve()
+
+			possessionVar(1).observe(true)
+			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(1).unobserve()
+
+			possessionVar(0).observe(false)
+			val possessProbZERO = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(0).unobserve()
+
+
+
+			Then("the new observations don't change the prior probability of possession")
+
+
+			/*assert(possessProbTHREE != possessProbPrior,
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 3")
+
+			assert(possessProbTWO === (possessProbPrior +- TOLERANCE),
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 2, 3")
+
+			assert(possessProbONE === (possessProbPrior +- TOLERANCE),
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 1, 2, 3")
+
+			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")*/
+
+
+			assert(allDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
+				"Probability of possession at t = 5 must be different, for INDIVIDUAL observations of possession")
+
+			Console.println(s"\n(F2, S2) Prior probability of possession at t = 5: \t $possessProbPrior")
+			Console.println(s"(F2, S2) Probability of possession at t = 5 | observe possession at t = 3: \t " +
+				s"$possessProbTHREE")
+			Console.println(s"(F2, S2) Probability of possession at t = 5 | observe possession at t = 2: \t " +
+				s"$possessProbTWO")
+			Console.println(s"(F2, S2) Probability of possession at t = 5 | observe possession at t = 1: \t " +
+				s"$possessProbONE")
+			Console.println(s"(F2, S2) Probability of possession at t = 5 | observe possession at t = 0: \t " +
+				s"$possessProbZERO")
+		}
+
+		//DEPENDENT + NOT FOUR
 
 		Scenario("Markov assumption doesn't apply: " +
 			"the probabilities of possession after the new observations, given no observation at immediately " +
@@ -248,9 +356,13 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 			"5.") {
 
 
+			possessionVar = resetChain(possessionVar, TIME_STEP_LIMIT = 5)
+
+			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
+
 
 			Given("observe no ball possession at t = 4")
-			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
+
 
 
 			When("observe ball possession at earlier times (t = 3, 2, 1 ...) other than immediately preceding time" +
@@ -269,7 +381,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the prior probability of possession")
 
-			assert(possessProbPrior === (0.48 +- TOLERANCE))
+			/*assert(possessProbPrior === (0.48 +- TOLERANCE))
 
 
 			assert(possessProbTHREE === (possessProbPrior +- TOLERANCE),
@@ -282,28 +394,30 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 1, 2, 3")
 
 			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
-				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")*/
 
-			Console.println(s"\n(F2, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3: \t " +
+			Console.println(s"\n(F2, S3) Prior probability of possession at t = 5: \t $possessProbPrior")
+			Console.println(s"(F2, S3) Probability of possession at t = 5 | observe possession at t = 3: \t " +
 				s"$possessProbTHREE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2, 3: \t " +
+			Console.println(s"(F2, S3) Probability of possession at t = 5 | observe possession at t = 2, 3: \t " +
 				s"$possessProbTWO")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1,2,3: \t " +
+			Console.println(s"(F2, S3) Probability of possession at t = 5 | observe possession at t = 1,2,3: \t " +
 				s"$possessProbONE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0,1,2,3: \t " +
+			Console.println(s"(F2, S3) Probability of possession at t = 5 | observe possession at t = 0,1,2,3: \t " +
 				s"$possessProbZERO")
 
 		}
 
-
+		// DEPENDENT + FOUR
 		Scenario("Markov assumption applies: P( Poss(5) _|_ Poss(3,2,1..) | Poss(4)" +
 			"the new observations don't change the probability of possession from t = 4. " +
 			"Whether you had possession at t = 5 is independent of whether you had possession at earlier times" +
 			"given whether you had possession at t = 4. ") {
 
-			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
+			possessionVar = resetChain(possessionVar, TIME_STEP_LIMIT = 5)
+
+			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
 			Given("observe ball possession at t = 4")
 			possessionVar(4).observe(true)
@@ -312,9 +426,9 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			When("observe ball possession at earlier times (t = 3, 2, 1 ...)")
 
-			possessionVar(3).observe(false)
+			possessionVar(3).observe(true)
 			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(2).observe(true)
+			possessionVar(2).observe(false)
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).observe(true)
 			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
@@ -323,9 +437,9 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 
-			Then("the new observations don't change the probability of possesion from t = 4.")
+			Then("the new observations don't change the probability of possession from t = 4.")
 
-			assert(possessProbPrior === (0.42874500000000004 +- TOLERANCE))
+			/*assert(possessProbPrior === (0.42874500000000004 +- TOLERANCE))
 
 			assert(possessProbPrior != possessProbFOUR &&
 				possessProbPrior != possessProbTHREE &&
@@ -337,22 +451,33 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 			assert(possessProbFOUR === (0.6 +- TOLERANCE),
-				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 4")
+				"(F2, S4) Probability of possession at t = 5 | observed possession at t = 4")
 
 			assert(possessProbTHREE === (0.6 +- TOLERANCE),
-				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 3, 4")
+				"(F2, S4) Probability of possession at t = 5 | observed possession at t = 3, 4")
 
 			assert(possessProbTWO === (0.6 +- TOLERANCE),
-				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 2, 3, 4")
+				"(F2, S4) Probability of possession at t = 5 | observed possession at t = 2, 3, 4")
 
 			assert(possessProbONE === (0.6 +- TOLERANCE),
-				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 1, 2, 3, 4")
+				"(F2, S4) Probability of possession at t = 5 | observed possession at t = 1, 2, 3, 4")
 
 			assert(possessProbZERO === (0.6 +- TOLERANCE),
-				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3, 4")
+				"(F2, S4) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3, 4")*/
 
+
+			Console.println(s"\n(F2, S4) Prior probability of possession at t = 5: \t $possessProbPrior")
+			Console.println(s"(F2, S4) Probability of possession at t = 5 | observe possession at t = 4: \t " +
+				s"$possessProbFOUR")
+			Console.println(s"(F2, S4) Probability of possession at t = 5 | observe possession at t = 3,4: \t " +
+				s"$possessProbTHREE")
+			Console.println(s"(F2, S4) Probability of possession at t = 5 | observe possession at t = 2,3,4: \t " +
+				s"$possessProbTWO")
+			Console.println(s"(F2, S4) Probability of possession at t = 5 | observe possession at t = 1,2,3,4: \t " +
+				s"$possessProbONE")
+			Console.println(s"(F2, S4) Probability of possession at t = 5 | observe possession at t = 0,1,2,3,4: \t " +
+				s"$possessProbZERO")
 		}
-
 
 	}
 
