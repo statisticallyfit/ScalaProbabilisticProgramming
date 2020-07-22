@@ -209,6 +209,8 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).observe(true)
 			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(0).observe(false)
+			val possessProbZERO: Double = VariableElimination.probability(possessionVar(5), true)
 
 
 
@@ -225,6 +227,9 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			assert(possessProbONE === (possessProbPrior +- TOLERANCE),
 				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 1, 2, 3")
+
+			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")
 
 		}
 
@@ -244,12 +249,14 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			When("observe ball possession at earlier times (t = 3, 2, 1 ...)")
 
-			possessionVar(3).observe(true)
+			possessionVar(3).observe(false)
 			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(2).observe(true)
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).observe(true)
 			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(0).observe(false)
+			val possessProbZERO: Double = VariableElimination.probability(possessionVar(5), true)
 
 
 
@@ -257,17 +264,29 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			assert(possessProbPrior === (0.48 +- TOLERANCE))
 
+			assert(possessProbPrior != possessProbFOUR &&
+				possessProbPrior != possessProbTHREE &&
+				possessProbPrior != possessProbTWO &&
+				possessProbPrior != possessProbONE &&
+				possessProbPrior != possessProbZERO,
+				"(F2, S2) Probability of possession at t = 5 changes for earlier times " +
+					"once we observe possession at immediately preceding time t = 4")
+
+
 			assert(possessProbFOUR === (0.6 +- TOLERANCE),
-				"(F2, S3) Probability of possession at t = 5 | observed possession at t = 4")
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 4")
 
 			assert(possessProbTHREE === (0.6 +- TOLERANCE),
-				"(F2, S3) Probability of possession at t = 5 | observed possession at t = 3, 4")
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 3, 4")
 
 			assert(possessProbTWO === (0.6 +- TOLERANCE),
-				"(F2, S3) Probability of possession at t = 5 | observed possession at t = 2, 3, 4")
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 2, 3, 4")
 
 			assert(possessProbONE === (0.6 +- TOLERANCE),
-				"(F2, S3) Probability of possession at t = 5 | observed possession at t = 1, 2, 3, 4")
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 1, 2, 3, 4")
+
+			assert(possessProbZERO === (0.6 +- TOLERANCE),
+				"(F2, S2) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3, 4")
 
 		}
 
