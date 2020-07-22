@@ -182,9 +182,62 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 	info("and is independent of possessions at previous times.")
 
 
-	Feature("How Markov Assumption Applies for Immediate Past: the state at any time point is conditionally " +
+	Feature("How Markov Assumption Operates in Immediate Past: the state at any time point is conditionally " +
 		"independent of all earlier states given the directly previous state") {
 
+		Scenario("") {
+
+			Given("observe no ball possession at t = 4")
+			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
+
+
+			When("observe ball possession SEPERATELY at earlier times (t = 3, 2, 1 ...) other than immediately " +
+				"preceding time t = 4")
+
+			possessionVar(3).observe(false)
+			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(3).unobserve()
+
+			possessionVar(2).observe(true)
+			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(2).unobserve()
+
+			possessionVar(1).observe(true)
+			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(1).unobserve()
+
+			possessionVar(0).observe(false)
+			val possessProbZERO = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(0).unobserve()
+
+
+
+			Then("the new observations don't change the prior probability of possession")
+
+			assert(possessProbPrior === (0.48 +- TOLERANCE))
+
+
+			assert(possessProbTHREE === (possessProbPrior +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 3")
+
+			assert(possessProbTWO === (possessProbPrior +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 2, 3")
+
+			assert(possessProbONE === (possessProbPrior +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 1, 2, 3")
+
+			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
+				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")
+
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3: \t " +
+				s"$possessProbTHREE")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2: \t " +
+				s"$possessProbTWO")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1: \t " +
+				s"$possessProbONE")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0: \t " +
+				s"$possessProbZERO")
+		}
 
 
 		Scenario("Markov assumption doesn't apply: " +
@@ -205,7 +258,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			possessionVar(3).observe(true)
 			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(2).observe(true)
+			possessionVar(2).observe(false)
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).observe(true)
 			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
@@ -230,6 +283,16 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			assert(possessProbZERO === (possessProbPrior +- TOLERANCE),
 				"(F2, S1) Probability of possession at t = 5 | observed possession at t = 0, 1, 2, 3")
+
+			Console.println(s"\n(F2, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3: \t " +
+				s"$possessProbTHREE")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2, 3: \t " +
+				s"$possessProbTWO")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1,2,3: \t " +
+				s"$possessProbONE")
+			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0,1,2,3: \t " +
+				s"$possessProbZERO")
 
 		}
 
@@ -262,7 +325,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the probability of possesion from t = 4.")
 
-			assert(possessProbPrior === (0.48 +- TOLERANCE))
+			assert(possessProbPrior === (0.42874500000000004 +- TOLERANCE))
 
 			assert(possessProbPrior != possessProbFOUR &&
 				possessProbPrior != possessProbTHREE &&
