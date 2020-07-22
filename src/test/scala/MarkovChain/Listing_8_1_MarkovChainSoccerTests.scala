@@ -479,6 +479,15 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 	}
 
+	//TODO check equal with tolerance and then NOT equal with tolerance instead of putting in the actual numbers 0.6
+	// or 0.48 ...
+
+	//TODO 2 do same for future as above
+
+	// TODO 3 apply the past info above as property based checking (arbitrary time not just t = 5)
+
+	//TODO 4 apply the future info above as property based checking (arbtirary time not just t = 5)
+
 
 	/*possessionVar(4).unobserve()
 	possessionVar(3).unobserve()
