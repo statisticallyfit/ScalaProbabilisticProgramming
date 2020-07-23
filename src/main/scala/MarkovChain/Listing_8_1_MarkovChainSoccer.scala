@@ -49,3 +49,41 @@ object Listing_8_1_MarkovChainSoccer {
 	}
 
 }
+
+object Listing_8_1_Runner extends App {
+
+	import Listing_8_1_MarkovChainSoccer._
+
+
+	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
+	// any time point, given observations at any time points.
+
+
+	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+
+
+	/**
+	 * 1) First ask for probability before observing any evidence:
+	 */
+	// Query probability that you have possession at time step 5, before observing any evidence:
+	// This is also called the prior probability that you have possession at time step 5.
+	println(VariableElimination.probability(target = possessionVar(5), value = true))
+
+	/**
+	 * 2) Now set evidence of having possession at time step 4
+	 */
+	possessionVar(4).observe(true)
+	//Now the probability of possession at time = 5 has increased
+	println(VariableElimination.probability(possessionVar(5), true))
+
+	/**
+	 * Repeating query doesn't change result from previous query: still assumes you had the ball at time step 4.
+	 */
+	println(VariableElimination.probability(possessionVar(5), true))
+
+	/**
+	 * Having no ball at time step 4 lowers the probability of having it at time step 5
+	 */
+	possessionVar(4).observe(false)
+	println(VariableElimination.probability(possessionVar(5), true))
+}

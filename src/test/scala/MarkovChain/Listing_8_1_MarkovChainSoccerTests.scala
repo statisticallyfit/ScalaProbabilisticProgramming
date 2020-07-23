@@ -4,210 +4,22 @@ package MarkovChain
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
+
 import org.scalatest._
 import org.scalatest.featurespec.AnyFeatureSpec
 
-import scala.collection.mutable
-
-//import org.scalatest.matchers.should.Matchers._
 //import org.scalactic.TypeCheckedTripleEquals._
 import org.scalactic.Tolerance._
 
-//import org.specs2.mutable._
-
-
-
-
-object MarkovChainSoccerState {
-
-
-	import Listing_8_1_MarkovChainSoccer._
-
-	//var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
-
-	final val FIVE = 5
-	final val FOUR = 4
-	final val THREE: Int = 3
-	final val TWO: Int = 2
-	final val SIX: Int = 6
-	final val SEVEN: Int = 7
-
-	final val TOLERANCE: Double = 0.00000001
-
-
-	/*/**
-	 * Given a markov chain, this function resets the state given the limit or time step
-	 * @param variable
-	 * @param TIME_STEP_LIMIT
-	 * @return
-	 */
-	def resetChain(variable: Array[Element[Boolean]], TIME_STEP_LIMIT: Int = 10) = {
-		(0 until TIME_STEP_LIMIT).map(num => variable(num).unobserve())
-
-		variable
-	}*/
-
-	/**
-	 * Simple check to see if the given elements are all distinct or not
-	 * @param elements
-	 * @return
-	 */
-	def allDifferent(elements: Double*): Boolean = {
-		List(elements).distinct.length == List(elements).length
-	}
-	//---------------------------------------------------------------------------------------------------------------------
-
-
-	def approximatelyEqual(num1: Double, num2: Double, precision: Double): Boolean = if ( (num1 - num2).abs < precision)
-		true else false
-
-
-	def approxEqual(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
-		xs.combinations(n = 2).forall{ case Seq(e1, e2) => approximatelyEqual(e1, e2, precision = precision)}
-	}
-
-	def notAllSame(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
-
-		// Contains elements true or false indicating if the pairs in that location were equal (with tolerance) or not.
-		val pairsEqual: List[Boolean] = xs.combinations(n = 2).map{
-			case Seq(e1, e2) => approximatelyEqual(e1, e2, precision = precision )
-		}.toList
-
-		//val wasNonEqualPair: Boolean = pairsEqual.exists(isPairEqual => !isPairEqual) // does there exist at least one
-		// pair that wasn't equal?
-
-		val wereAllPairsEqual: Boolean = pairsEqual.reduceLeft(_ && _ )
-
-		! wereAllPairsEqual
-	}
-
-
-	/**
-	 * Checks that all elements are either never equal to one another, or there are some equal ones among them but
-	 * there is at least one pair that are not equal.
-	 *
-	 * Never returns TRUE when all the elements are equal
-	 */
-
-
-
-	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
-	// any time point, given observations at any time points.
-
-
-	/**
-	 * 1) First ask for probability before observing any evidence:
-	 */
-	// Query probability that you have possession at time step 5, before observing any evidence:
-	// This is also called the prior probability that you have possession at time step 5.
-	/*println(VariableElimination.probability(target = possessionVar(5), value = true))
-
-	/**
-	 * 2) Now set evidence of having possession at time step 4
-	 */
-	possessionVar(4).observe(true)
-	//Now the probability of possession at time = 5 has increased
-	println(VariableElimination.probability(possessionVar(5), true))
-
-	/**
-	 * Repeating query doesn't change result from previous query: still assumes you had the ball at time step 4.
-	 */
-	println(VariableElimination.probability(possessionVar(5), true))
-
-	/**
-	 * Having no ball at time step 4 lowers the probability of having it at time step 5
-	 */
-	possessionVar(4).observe(false)
-	println(VariableElimination.probability(possessionVar(5), true))*/
-
-}
 
 
 
 class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenThen {
 
 
-	import MarkovChainSoccerState._
+	import util.Util._
 	import Listing_8_1_MarkovChainSoccer._
 
-
-	/*info("Markov Assumption Test for Non-Immediate Past: ")
-	info("Possession at current time t = 5")
-	info("depends only on")
-	info("possession at previous time point 4")
-	info("and is independent of possessions at previous times.")
-
-
-
-	Feature("How Markov Assumption Doesn't Apply for Non-Immediate Past") {
-
-		Scenario("Observe possession at t = 2 (three steps behind current time t = 5)"){
-
-			Given("no current observed ball possession at t = 5")
-			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
-			//assert()
-
-			When("ball is possessed at t = 2")
-			possessionVar(2).observe(true)
-			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
-
-
-			Then("Markov assumption doesn't apply; the probability of possession at t = 5 differs from prior " +
-				"probability of possession at t = 5")
-			assert(possessProbTWO != priorProb)
-
-			Console.println(s"\n(F1, S1) Prior probability of possession at t = 5: \t $priorProb")
-			Console.println(s"(F1, S1) Probability of possession at t = 5 after observing possession at t = 2: \t " +
-				s"$possessProbTWO")
-		}
-
-
-		Scenario("Observe possession at t = 2 and t = 3 (two steps behind current time t = 5)") {
-
-			Given("no current observed ball possession at t = 5")
-			val priorProb: Double = VariableElimination.probability(possessionVar(5), true)
-			//assert()
-
-			When("ball is possessed at t = 3")
-			possessionVar(3).observe(true)
-			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-
-
-			Then("Markov assumption doesn't apply; the probability of possession at t = 5 differs from prior " +
-				"probability of possession at t = 5")
-			assert(possessProbTHREE != priorProb)
-
-			Console.println(s"\n(F1, S2) Prior probability of possession at t = 5: \t $priorProb")
-			Console.println(s"(F1, S2) Probability of possession at t = 5 after observing possession at t = " +
-				s"3: \t$possessProbTHREE")
-
-		}
-
-		Scenario("Compare possessions at t = 2, and t = 3 (two time steps behind current time t = 5)"){
-			Given("no current observed ball possession at t = 5")
-
-			When("ball is possessed at t = 2, and then also at t = 3")
-			possessionVar(2).observe(true)
-			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
-
-			possessionVar(3).observe(true)
-			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-
-
-
-			Then("Markov assumption applies for those consecutive time steps; probability of possession at t = 5" +
-				" after observing possession at t = 2 and t = 3 should be equal")
-			assert(possessProbTWO === (possessProbTHREE +- TOLERANCE))
-
-			Console.println(s"\n(F1, S3) Probability of possession at t = 5 after observing possession at t = " +
-				s"2: \t $possessProbTWO")
-			Console.println(s"(F1, S3) Probability of possession at t = 5 after observing possession at t = 2, and" +
-				s" t = " +
-				s"3: \t$possessProbTHREE")
-		}
-
-
-	}*/
 
 
 	info("Markov Assumption Test for Non-Immediate Past: " +
@@ -264,6 +76,12 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
+			assert(notAllSame(possessProbPrior, possessProbTHREE))
+			assert(notAllSame(possessProbPrior, possessProbTWO))
+			assert(notAllSame(possessProbPrior, possessProbONE))
+			assert(notAllSame(possessProbPrior, possessProbZERO))
+
+
 			assert(allDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
 				notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
@@ -314,6 +132,10 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
+			assert(notAllSame(possessProbPrior, possessProbTHREE))
+			assert(notAllSame(possessProbPrior, possessProbTWO))
+			assert(notAllSame(possessProbPrior, possessProbONE))
+			assert(notAllSame(possessProbPrior, possessProbZERO))
 
 			assert(List(possessProbTHREE,
 				possessProbTWO,
@@ -394,6 +216,12 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
+			assert(notAllSame(possessProbPrior, possessProbFOUR))
+			assert(notAllSame(possessProbPrior, possessProbTHREE))
+			assert(notAllSame(possessProbPrior, possessProbTWO))
+			assert(notAllSame(possessProbPrior, possessProbONE))
+			assert(notAllSame(possessProbPrior, possessProbZERO))
+
 			assert(List(possessProbFOUR,
 				possessProbTHREE,
 				possessProbTWO,
@@ -451,6 +279,12 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 			Then("the new observations don't change the probability of possession at t = 5.")
+
+			assert(notAllSame(possessProbPrior, possessProbFOUR))
+			assert(notAllSame(possessProbPrior, possessProbTHREE))
+			assert(notAllSame(possessProbPrior, possessProbTWO))
+			assert(notAllSame(possessProbPrior, possessProbONE))
+			assert(notAllSame(possessProbPrior, possessProbZERO))
 
 			assert(
 				approxEqual(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
@@ -536,8 +370,13 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(allDifferent(possessProbSEVEN, possessProbNINE, possessProbNINE, possessProbTEN) ||
-				notAllSame(possessProbSEVEN, possessProbNINE, possessProbNINE, possessProbTEN),
+			assert(notAllSame(possessProbPrior, possessProbSEVEN))
+			assert(notAllSame(possessProbPrior, possessProbEIGHT))
+			assert(notAllSame(possessProbPrior, possessProbNINE))
+			assert(notAllSame(possessProbPrior, possessProbTEN))
+
+			assert(allDifferent(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN) ||
+				notAllSame(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
 					"INDIVIDUAL observations of possession")
 
@@ -590,6 +429,11 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 			Then("the new observations don't change the probability of possession at t = 5.")
+
+			assert(notAllSame(possessProbPrior, possessProbSEVEN))
+			assert(notAllSame(possessProbPrior, possessProbEIGHT))
+			assert(notAllSame(possessProbPrior, possessProbNINE))
+			assert(notAllSame(possessProbPrior, possessProbTEN))
 
 			assert(
 				approxEqual(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
@@ -673,6 +517,12 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
+			assert(notAllSame(possessProbPrior, possessProbSIX))
+			assert(notAllSame(possessProbPrior, possessProbSEVEN))
+			assert(notAllSame(possessProbPrior, possessProbEIGHT))
+			assert(notAllSame(possessProbPrior, possessProbNINE))
+			assert(notAllSame(possessProbPrior, possessProbTEN))
+
 			assert(List(possessProbSIX,
 				possessProbSEVEN,
 				possessProbEIGHT,
@@ -737,6 +587,12 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
+			assert(notAllSame(possessProbPrior, possessProbSIX))
+			assert(notAllSame(possessProbPrior, possessProbSEVEN))
+			assert(notAllSame(possessProbPrior, possessProbEIGHT))
+			assert(notAllSame(possessProbPrior, possessProbNINE))
+			assert(notAllSame(possessProbPrior, possessProbTEN))
+
 			assert(List(possessProbSIX,
 				possessProbSEVEN,
 				possessProbEIGHT,
@@ -769,28 +625,4 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 	//TODO 4 apply the future info above as property based checking (arbtirary time not just t = 5)
 
 
-	/*possessionVar(4).unobserve()
-	possessionVar(3).unobserve()
-
-	{
-		/**
-		 * Example of Markov Assumption for Future
-		 *
-		 * Whether you had possession in minute 7 adds no new information to possession at minute 5 after minute 6 is
-		 * known.
-		 *
-		 */
-		//Adding information: we had possession at time step 6
-		possessionVar(6).observe(true)
-		val probAfter6: Double = VariableElimination.probability(possessionVar(5), true)
-
-		//Adding future information again: possession at time step 7
-		possessionVar(7).observe(true)
-		val probAfter7: Double = VariableElimination.probability(possessionVar(5), true)
-
-		println(s"\nProbability of possession at t = 5 after observing possession at t = 6: \t $probAfter6")
-		println(s"Probability of possession at t = 5 after observing possession at t = 6, 7: \t $probAfter7")
-
-		assert(probAfter6 === probAfter7 +- 0.000000000001, "Test (future) markov assumption")
-	}*/
 }
