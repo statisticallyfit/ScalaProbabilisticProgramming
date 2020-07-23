@@ -264,8 +264,10 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(allDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
-				"Probability of possession at t = 5 must be different, for INDIVIDUAL observations of possession")
+			assert(allDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
+				notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
+				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
+					"INDIVIDUAL observations of possession")
 
 
 			Console.println(s"\n(F1, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
@@ -534,8 +536,10 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(allDifferent(possessProbSEVEN, possessProbNINE, possessProbNINE, possessProbTEN),
-				"Probability of possession at t = 5 must be different, for INDIVIDUAL observations of possession")
+			assert(allDifferent(possessProbSEVEN, possessProbNINE, possessProbNINE, possessProbTEN) ||
+				notAllSame(possessProbSEVEN, possessProbNINE, possessProbNINE, possessProbTEN),
+				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
+					"INDIVIDUAL observations of possession")
 
 
 			Console.println(s"\n(F3, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
@@ -759,10 +763,6 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 	}
 
-	// TODO make function "not all the same" using tolerance
-	// TODO make function "all equal" with tolerance
-
-	//TODO 2 do same for future as above
 
 	// TODO 3 apply the past info above as property based checking (arbitrary time not just t = 5)
 
