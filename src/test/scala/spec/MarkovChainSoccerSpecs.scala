@@ -16,7 +16,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 
 	import MarkovChain.Listing_8_1_MarkovChainSoccer._
-	import utilbox.Util._
+	import utils.Utils._
 
 
 	info("Markov Assumption Test for Non-Immediate Past: " +
@@ -39,7 +39,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"change the probability of possession at t = 5. ") {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -60,7 +60,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			possessionVar(2).unobserve()
 
 			possessionVar(1).observe(true)
-			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
+			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).unobserve()
 
 			possessionVar(0).observe(false)
@@ -103,7 +103,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 3, 2, 1, 0, given (no) observed possession at t = 4. ") {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -176,7 +176,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 3, 2, 1, 0, given observed possession at t = 4. ")  {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -251,7 +251,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 4, 3, 2, 1, 0, given observed possession at t = 4. ")  {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -333,7 +333,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"Given no observed possession at t = 6, new SEPARATE observations of possession at t = 7, 8, ... " +
 			"change the probability of possession at t = 5. ") {
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -397,7 +397,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 7, 8, 9, 10, given (no) observed possession at t = 6. ") {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -477,7 +477,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 7, 8, 9, 10, given observed possession at t = 6. ")  {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 
@@ -553,7 +553,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			"possession at t = 6,7,8,9,10, given observed possession at t = 6. ")  {
 
 
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
 

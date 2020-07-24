@@ -11,6 +11,9 @@ import com.cra.figaro.library.compound.If
  */
 object Listing_8_1_MarkovChainSoccer {
 
+
+	var CHAIN_LENGTH: Int = 90
+
 	/**
 	 * Creates a markov chain represention possession of soccer ball at discrete time steps
 	 *
@@ -58,7 +61,7 @@ object Listing_8_1_Runner extends App {
 	// any time point, given observations at any time points.
 
 
-	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = 90)
+	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 
 	/**

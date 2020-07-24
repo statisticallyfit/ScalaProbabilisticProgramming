@@ -1,9 +1,9 @@
-package utilbox
+package utils
 
 /**
  *
  */
-object Util {
+object Utils {
 
 
 	final val TOLERANCE: Double = 0.00000001
@@ -38,6 +38,11 @@ object Util {
 	 */
 	def notAllSame(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
 
+		// First do error checking: if empty passed list, then say TRUE anyway:
+		if(xs.toList.isEmpty) return true
+
+		// Else continue to evaluate
+
 		// Contains elements true or false indicating if the pairs in that location were equal (with tolerance) or not.
 		val pairsEqual: List[Boolean] = xs.combinations(n = 2).map{
 			case Seq(e1, e2) => approximatelyEqual(e1, e2, precision = precision )
@@ -46,7 +51,7 @@ object Util {
 		//val wasNonEqualPair: Boolean = pairsEqual.exists(isPairEqual => !isPairEqual) // does there exist at least one
 		// pair that wasn't equal?
 
-		val wereAllPairsEqual: Boolean = pairsEqual.reduceLeft(_ && _ )
+		val wereAllPairsEqual: Boolean = pairsEqual.foldLeft(true)(_ && _) // .reduceLeft(_ && _ )
 
 		! wereAllPairsEqual
 	}
