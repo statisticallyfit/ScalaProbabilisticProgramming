@@ -1,6 +1,5 @@
 package MarkovChain
 
-
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
 import com.cra.figaro.library.compound.If

@@ -1,10 +1,7 @@
-package MarkovChain
-
-
+package spec
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
-
 import org.scalatest._
 import org.scalatest.featurespec.AnyFeatureSpec
 
@@ -14,12 +11,12 @@ import org.scalactic.Tolerance._
 
 
 
-class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenThen {
+
+class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 
-	import util.Util._
-	import Listing_8_1_MarkovChainSoccer._
-
+	import MarkovChain.Listing_8_1_MarkovChainSoccer._
+	import utilbox.Util._
 
 
 	info("Markov Assumption Test for Non-Immediate Past: " +
@@ -34,8 +31,6 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 	Feature("How Markov Assumption Operates in Non-Immediate Past: " +
 		"the state of any time point is conditionally independent of all earlier states given the directly " +
 		"previous state (not observed)") {
-
-
 
 		// INDEPENDENT + NOT FOUR
 
@@ -53,7 +48,7 @@ class Listing_8_1_MarkovChainSoccerTests extends AnyFeatureSpec with GivenWhenTh
 
 
 
-			When("observe ball possession SEPERATELY at earlier times (t = 3, 2, 1 ...) excluding the immediately " +
+			When("observe ball possession SEPARATELY at earlier times (t = 3, 2, 1 ...) excluding the immediately " +
 				"preceding time t = 4 ...")
 
 			possessionVar(3).observe(true)
