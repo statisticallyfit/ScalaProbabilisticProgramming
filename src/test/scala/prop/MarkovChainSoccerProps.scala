@@ -214,7 +214,9 @@ object Checker extends Properties("MarkovAssumption") {
 
 	import MarkovChainSoccerProps._
 
-	//propExclusiveSeparatePossessions.check()
+	//testExclSeparObservations.check()
+	testExclCumulObservations.check()
+
 	//propExclusiveCumulativePossessions.check()
 	// Test: inclusive / immediate time past (<= currentTime - 1)
 
