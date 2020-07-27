@@ -6,7 +6,7 @@ package utils
 object Utils {
 
 
-	final val TOLERANCE: Double = 0.000000000000000000000000001
+	final val TOLERANCE: Double = 0.00000001
 
 
 	/**
@@ -18,7 +18,7 @@ object Utils {
 		List(elements).distinct.length == List(elements).length
 	}
 
-	def approxEqual(num1: Double, num2: Double, precision: Double): Boolean = {
+	def twoApproxEqual(num1: Double, num2: Double, precision: Double = TOLERANCE): Boolean = {
 		//Console.println(s"approxEqual(): Comparing num1 = $num1 and num2 = $num2")
 
 		if ( (num1 - num2).abs < precision)
@@ -27,7 +27,7 @@ object Utils {
 
 
 	def approxEqual(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
-		xs.combinations(n = 2).forall{ case Seq(e1, e2) => approxEqual(e1, e2, precision = precision)}
+		xs.combinations(n = 2).forall{ case Seq(e1, e2) => twoApproxEqual(e1, e2, precision = precision)}
 	}
 
 	/**
@@ -51,7 +51,7 @@ object Utils {
 
 		// Contains elements true or false indicating if the pairs in that location were equal (with tolerance) or not.
 		val pairsEqual: List[Boolean] = xs.combinations(n = 2).map{
-			case Seq(firstNumber, secondNumber) => approxEqual(firstNumber, secondNumber, precision = precision )
+			case Seq(firstNumber, secondNumber) => twoApproxEqual(firstNumber, secondNumber, precision = precision )
 		}.toList
 
 		//val wasNonEqualPair: Boolean = pairsEqual.exists(isPairEqual => !isPairEqual) // does there exist at least one
