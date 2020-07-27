@@ -149,22 +149,42 @@ object MarkovChainSoccerProps {
 
 }
 
-object Checker { //extends Properties("MarkovAssumption") {
 
-
+object Checker extends Properties("MarkovAssumption") {
+	
 	import MarkovChainSoccerProps._
 
 	//propExclusiveSeparatePossessions.check()
 	//propExclusiveCumulativePossessions.check()
+	// Test: inclusive / immediate time past (<= currentTime - 1)
+
+	// Choose the number above (future) the current time in a dynamic way ...
+	// ... for non-immediate future (> currentTime + 1)
+	// ... for immediate future  (>= currentTime + 1)
+}
+
+
+object VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("MarkovAssumption") {
+
+	/**
+	 * Verifying that markov assumption (in one of the cases where it applies like below is F2, S2 in specs file)
+	 * holds even when switching up the order of the observed probabilities.
+	 */
+
+	import MarkovChainSoccerProps._
+
 
 	var counter = 0
 	val currentTime = 15
-	val haveBall = false
+	val haveBall = true
 	CHAIN_LENGTH = 20
 
 
 
 	def autoTest = {
+
+		println("\nTesting for loop")
+
 
 		Console.println(s"\nITERATION = $counter | currentTime = $currentTime | haveBall = $haveBall")
 		// ---------------------
@@ -180,7 +200,7 @@ object Checker { //extends Properties("MarkovAssumption") {
 
 		// Create list of points in time such that they are less than current time (so in the past) but also
 		// strictly less than the current time (so 0,1,2,3 for currtime = 5)
-		val exclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
+		val exclusivePastTimes: Seq[DiscreteTime] = (0 until (currentTime - 1)).reverse //inclusive endpoint
 
 
 		// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
@@ -188,7 +208,7 @@ object Checker { //extends Properties("MarkovAssumption") {
 
 
 		//exclusivePastTimePoints.foreach{ time =>
-		for (time <- exclusivePastTimes) {
+		for { time <- exclusivePastTimes } {
 
 			possessionVar(time).observe(observation = haveBall)
 
@@ -226,42 +246,127 @@ object Checker { //extends Properties("MarkovAssumption") {
 
 	def manualTest = {
 
-		println("\n Testing manually")
+		println("\n Testing manually 1")
 
 		val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
-		val possessProbPrior: Double = VariableElimination.probability(possessionVar(5), true)
-
-
-
-		possessionVar(3).observe(true)
-		val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-		possessionVar(2).observe(false)
-		val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
-		possessionVar(1).observe(true)
-		val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
-		possessionVar(0).observe(false)
-		val possessProbZERO: Double = VariableElimination.probability(possessionVar(5), true)
+		possessionVar(3).observe(haveBall)
+		val possessProbTHREE: Double = VariableElimination.probability(possessionVar(currentTime), true)
+		possessionVar(2).observe(haveBall)
+		val possessProbTWO: Double = VariableElimination.probability(possessionVar(currentTime), true)
+		possessionVar(1).observe(haveBall)
+		val possessProbONE: Double = VariableElimination.probability(possessionVar(currentTime), true)
+		possessionVar(0).observe(haveBall)
+		val possessProbZERO: Double = VariableElimination.probability(possessionVar(currentTime), true)
 
 
 		println(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
-		Console.println("notAllSame(possessProbPrior, possessProbTHREE) = " + notAllSame(possessProbPrior,
-			possessProbTHREE))
-		println(s"notAllSame(possessProbPrior, possessProbTWO) = ${notAllSame(possessProbPrior, possessProbTWO)}")
-		println(s"notAllSame(possessProbPrior, possessProbONE) = ${notAllSame(possessProbPrior, possessProbONE)}")
-		println(s"notAllSame(possessProbPrior, possessProbZERO) = ${notAllSame(possessProbPrior, possessProbZERO)}")
-
-
 		println("approx equal = " + approxEqual(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
+
+		// ----------------------------
+		println("\n Testing manually 2")
+
+		val possessionVar2: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+		possessionVar2(1).observe(haveBall)
+		val possessProbONE2: Double = VariableElimination.probability(possessionVar2(currentTime), true)
+
+		possessionVar2(3).observe(haveBall)
+		val possessProbTHREE2: Double = VariableElimination.probability(possessionVar2(currentTime), true)
+		possessionVar2(0).observe(haveBall)
+		val possessProbZERO2: Double = VariableElimination.probability(possessionVar2(currentTime), true)
+
+		possessionVar2(2).observe(haveBall)
+		val possessProbTWO2: Double = VariableElimination.probability(possessionVar2(currentTime), true)
+
+
+		println(possessProbTHREE2, possessProbTWO2, possessProbONE2, possessProbZERO2)
+		println("approx equal " + approxEqual(possessProbTHREE2, possessProbTWO2, possessProbONE2, possessProbZERO2))
+
+
+		// ----------------------------
+		println("\n Testing manually 3")
+
+		val possessionVar3: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+		possessionVar3(0).observe(haveBall)
+		val possessProbZERO3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
+		possessionVar3(1).observe(haveBall)
+		val possessProbONE3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
+		possessionVar3(2).observe(haveBall)
+		val possessProbTWO3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
+		possessionVar3(3).observe(haveBall)
+		val possessProbTHREE3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
+
+		println(possessProbTHREE3, possessProbTWO3, possessProbONE3, possessProbZERO3)
+		println("approx equal " + approxEqual(possessProbTHREE3, possessProbTWO3, possessProbONE3, possessProbZERO3))
+
+
+		// ---------------------------------------------------
+
+		println("\n Testing manually 4")
+
+		val possessionVar4: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+		possessionVar4(3).observe(false)
+		val possessProbTHREE4: Double = VariableElimination.probability(possessionVar4(currentTime), true)
+		possessionVar4(2).observe(true)
+		val possessProbTWO4: Double = VariableElimination.probability(possessionVar4(currentTime), true)
+		possessionVar4(1).observe(true)
+		val possessProbONE4: Double = VariableElimination.probability(possessionVar4(currentTime), true)
+		possessionVar4(0).observe(false)
+		val possessProbZERO4: Double = VariableElimination.probability(possessionVar4(currentTime), true)
+
+
+		println(possessProbTHREE4, possessProbTWO4, possessProbONE4, possessProbZERO4)
+		println("approx equal = " + approxEqual(possessProbTHREE4, possessProbTWO4, possessProbONE4,
+			possessProbZERO4))
+
+
+		// ----------------------------
+		println("\n Testing manually 5")
+
+		val possessionVar5: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+		possessionVar5(1).observe(false)
+		val possessProbONE5: Double = VariableElimination.probability(possessionVar5(currentTime), true)
+
+		possessionVar5(3).observe(true)
+		val possessProbTHREE5: Double = VariableElimination.probability(possessionVar5(currentTime), true)
+		possessionVar5(0).observe(true)
+		val possessProbZERO5: Double = VariableElimination.probability(possessionVar5(currentTime), true)
+
+		possessionVar5(2).observe(false)
+		val possessProbTWO5: Double = VariableElimination.probability(possessionVar5(currentTime), true)
+
+
+		println(possessProbTHREE5, possessProbTWO5, possessProbONE5, possessProbZERO5)
+		println("approx equal " + approxEqual(possessProbTHREE5, possessProbTWO5, possessProbONE5, possessProbZERO5))
+
+
+		// ----------------------------
+		println("\n Testing manually 6")
+
+		val possessionVar6: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+		possessionVar6(0).observe(false)
+		val possessProbZERO6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
+		possessionVar6(1).observe(true)
+		val possessProbONE6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
+		possessionVar6(2).observe(true)
+		val possessProbTWO6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
+		possessionVar6(3).observe(false)
+		val possessProbTHREE6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
+
+		println(possessProbTHREE6, possessProbTWO6, possessProbONE6, possessProbZERO6)
+		println("approx equal " + approxEqual(possessProbTHREE6, possessProbTWO6, possessProbONE6, possessProbZERO6))
+
 	}
 
 
 	def main(args: Array[String]) {
+		autoTest
+		println
 		manualTest
 	}
-	// Test: inclusive / immediate time past (<= currentTime - 1)
-
-	// Choose the number above (future) the current time in a dynamic way ...
-	// ... for non-immediate future (> currentTime + 1)
-	// ... for immediate future  (>= currentTime + 1)
 }
