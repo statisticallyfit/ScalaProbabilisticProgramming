@@ -33,47 +33,68 @@ object MarkovChainSoccerProps extends Properties("MarkovAssumption") {
 
 	CHAIN_LENGTH = 20
 
-	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
-
 
 	// Choose the current time step dynamically (in the specs this was t = 5)
-	val genCurrentTime: Gen[DiscreteTime] = Gen.choose(0, CHAIN_LENGTH)
+	val genCurrentTime: Gen[DiscreteTime] = Gen.choose(0, CHAIN_LENGTH - 1).suchThat( _ > 0)
 
 	// Decide if we observe true or false (so observing happens, but need to know if possession of ball is true
 	// or false)
 	val genObserveYesOrNo: Gen[Observation] = Gen.oneOf(true, false)
 
 
-	// Create list to store the observed probabilities of soccer ball possession at current time, after observations
-	val listOfPossessProbs: ListBuffer[Probability] = ListBuffer()
+
 
 	// Choose the number below (past) the current time in a dynamic way ...
 	// ... for non-immediate past (< currentTime - 1)
-	//val exclusivePastTime: Gen[DiscreteTime] = Gen.choose(0, genCurrentTime - 1)
+	var counter: Int = 0
+
 	val propExclusiveSeparatePossessions = forAll(genCurrentTime, genObserveYesOrNo) {
 
 		(currentTime: Int, yesOrNo: Boolean) =>
 
+			Console.println(s"\nITERATION = $counter | currentTime = $currentTime | yesOrNo = $yesOrNo")
+			// ---------------------
 
-		// Create list of points in time such that they are less than current time (so in the past) but also
-		// strictly less than the current time (so 0,1,2,3 for currtime = 5)
-		val exclusivePastTimePoints: Seq[DiscreteTime] = (0 until (currentTime - 1))
+			// Create the markov chain
+			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+			// Create list to store the observed probabilities of soccer ball possession at current time, after
+			// observations
+			val listOfPossessProbs: ListBuffer[Probability] = ListBuffer()
+
+			// Create list of points in time such that they are less than current time (so in the past) but also
+			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
+			val exclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
 
 
-		//exclusivePastTimePoints.foreach{ time =>
-		for (time <- exclusivePastTimePoints) {
+			//exclusivePastTimePoints.foreach{ time =>
+			for (time <- exclusivePastTimes) {
 
-			possessionVar(time).observe(observation = yesOrNo)
+				possessionVar(time).observe(observation = yesOrNo)
 
-			val possessProb: Probability = VariableElimination.probability(possessionVar(currentTime), true)
+				val possessProb: Probability = VariableElimination.probability(possessionVar(currentTime), true)
 
-			listOfPossessProbs += possessProb // adding this to list
+				listOfPossessProbs += possessProb // adding this to list
 
-			possessionVar(time).unobserve() // doing the "separate" observation tactic
-		}
+				possessionVar(time).unobserve() // doing the "separate" observation tactic
+			}
 
-		// The test: asserting that not all of these probabilities in the list should be the same:
-		notAllSame(listOfPossessProbs:_*)
+			// DEBUGGING
+			println(s"times = ${exclusivePastTimes.mkString(", ")}")
+			println(s"possess probs = ${listOfPossessProbs.mkString("\n")}")
+
+			// DEBUGGING
+
+			counter += 1
+			// The test: asserting that not all of these probabilities in the list should be the same:
+
+			Console.println(s"ITERATION = ${counter-1} \n\t| currentTime = $currentTime \n\t| yesOrNo = $yesOrNo " +
+				s"\n\t| not all same = ${notAllSame(listOfPossessProbs:_*)}")
+
+
+			notAllSame(listOfPossessProbs:_*)
+			//approxEqual(listOfPossessProbs:_*)
 
 	}
 
