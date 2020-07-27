@@ -34,6 +34,27 @@ object MarkovChainSoccerProps {
 	CHAIN_LENGTH = 20
 
 
+	var counter = 0 // DEBUGGING TOOL
+
+	// number of ways to observe evidence for possession variable. Can observe the evidence in:
+	// 1) increasing + in order (e.g. 0, 1,2,3, ... CURR_TIME-1, (CURR_TIME))
+	// 2) decreasing + in order (reverse) (e.g. (CURR_TIME), CURR_TIME-1, ,12,11, 12... 0)
+	// 3) random order (e.g. 4, 0, 6,8, ... CURR_TIME-1, ... 2, 5, 7, 3, ...)
+	final val NUM_WAYS_TO_OBSERVE = 3
+
+	// Whether we observe that the ball is possessed at current time or not (can randomly generate this, but easier
+	// this way on the testing generation from computation standpoint (?))
+	final val HAVE_BALL_AT_CURR_TIME = true
+	//
+	final val OBS_INCR = 0 // index of listbuffer corresponding to the first way of observing evidence (increasing +
+	// in
+	// order)
+	final val OBS_DECR = 1 // index of listbuffer corresponding to second way of observing evidence (decreasing + in
+	// order)
+	final val OBS_RANDOM = 2 // index of listbuffer corresponding to third way of observing evidence (random order)
+
+
+
 	// Choose the current time step dynamically (in the specs this was t = 5)
 	val genCurrentTime: Gen[DiscreteTime] = Gen.choose(0, CHAIN_LENGTH - 1).suchThat(_ > 0)
 
@@ -44,9 +65,9 @@ object MarkovChainSoccerProps {
 
 	// Test: exclusive time past (< currentTime - 1)
 
-	val propExclusiveSeparatePossessions = forAll(genCurrentTime, genHaveBall) {
+	val testExclSeparObservations = forAll(genCurrentTime, genHaveBall) {
 
-		(currentTime: Int, yesOrNo: Boolean) =>
+		(currentTime: Int, haveBall: Boolean) =>
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
@@ -64,9 +85,10 @@ object MarkovChainSoccerProps {
 			//exclusivePastTimePoints.foreach{ time =>
 			for (time <- exclusivePastTimes) {
 
-				possessionVar(time).observe(observation = yesOrNo)
+				possessionVar(time).observe(observation = haveBall)
 
-				val possessProb: Probability = VariableElimination.probability(possessionVar(currentTime), true)
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime), HAVE_BALL_AT_CURR_TIME)
 
 				listOfPossessProbs += possessProb // adding this to list
 
@@ -80,10 +102,10 @@ object MarkovChainSoccerProps {
 	}
 
 
-	var counter = 0
+
 	// Test: exclusive time past (< currentTime - 1)
 
-	val propExclusiveCumulativePossessions = forAll(genCurrentTime, genHaveBall) {
+	val testExclCumulObservations = forAll(genCurrentTime, genHaveBall) {
 
 		(currentTime: Int, haveBall: Boolean) =>
 
@@ -93,36 +115,74 @@ object MarkovChainSoccerProps {
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
-			val listOfPossessProbs: ListBuffer[Probability] = ListBuffer()
+			// Contains list of list, where inner list is specific to how the observations happened in time.
+			val probsList: List[ListBuffer[Probability]] =
+				List.fill[ListBuffer[Probability]](NUM_WAYS_TO_OBSERVE)(ListBuffer())
+
 
 			// Create list of points in time such that they are less than current time (so in the past) but also
 			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
-			val exclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
+			val exclusivePastTimes: Seq[DiscreteTime] = (0 until (currentTime - 1)) //exclusive endpoint
 
 
 			// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
-			val priorProb: Probability = VariableElimination.probability(possessionVar(currentTime), true)
+			val priorProb: Probability =
+				VariableElimination.probability(possessionVar(currentTime), HAVE_BALL_AT_CURR_TIME)
 
 
-			//exclusivePastTimePoints.foreach{ time =>
-			for (time <- exclusivePastTimes) {
+			// Way 1 to observe evidence: increasing and in order: (time is increasing)
+			for { time <- exclusivePastTimes } {
 
-				possessionVar(time).observe(observation = haveBall)
+				possessionVar(time).observe(haveBall)
 
-				val possessProb: Probability = VariableElimination.probability(possessionVar(currentTime), true)
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
 
-				listOfPossessProbs += possessProb // adding this to list
-
-				//possessionVar(time).unobserve() // doing the "separate" observation tactic
+				probsList(OBS_INCR) += possessProb
 			}
+
+			// Refresh markov chain
+			possessionVar = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+			// Way 2 to observe evidence: decreasing and in order: (time is reversed)
+			for { time <- exclusivePastTimes.reverse } {
+
+				possessionVar(time).observe(haveBall)
+
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
+
+				probsList(OBS_DECR) += possessProb
+			}
+
+
+
+			// Refresh markov chain
+			possessionVar = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+			// Way 3 to observe evidence: random order
+			import scala.util.Random
+
+			val randTimes = Random.shuffle(exclusivePastTimes)
+
+			for { time <- randTimes } {
+
+				possessionVar(time).observe(haveBall)
+
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
+
+				probsList(OBS_RANDOM) += possessProb
+			}
+
 
 			// DEBUGGING --------------------------------------------------------------------------
 			Console.println(s"times = ${exclusivePastTimes.mkString(", ")}")
-			Console.println(s"observed probs = ${listOfPossessProbs.mkString("\n")}")
+			Console.println(s"observed probs = ${probsList.mkString("\n")}")
 
 			counter += 1
 			// The test: asserting that not all of these probabilities in the list should be the same:
@@ -130,16 +190,16 @@ object MarkovChainSoccerProps {
 			// DEBUGGING --------------------------------------------------------------------------------
 
 			// Test 1: check the prior prob is not the same with EACH of the other possession probs
-			val result1 = listOfPossessProbs.forall(obsProb => notAllSame(obsProb, priorProb))
+			val result1 = probsList.forall(list => list.forall(obsProb => notAllSame(obsProb, priorProb)))
 
 
 			// Test 2:assert that all the observed probs are approximately equal
-			val result2 = approxEqual(listOfPossessProbs:_*)
+			val result2 = probsList.forall(list => approxEqual(list:_*))
 
 
 			// DEBUGGING --------------------------------------------------------------------------------
 
-			Console.println(s"ITERATION = ${counter-1} \n\t| currentTime = $currentTime \n\t| haveBall = $haveBall " +
+			Console.println(s"ITERATION = ${counter - 1} \n\t| currentTime = $currentTime \n\t| haveBall = $haveBall " +
 				s"\n\t| notSameEach = ${result1} \n\t| approxEqualObservedProbs = $result2")
 
 
@@ -151,7 +211,7 @@ object MarkovChainSoccerProps {
 
 
 object Checker extends Properties("MarkovAssumption") {
-	
+
 	import MarkovChainSoccerProps._
 
 	//propExclusiveSeparatePossessions.check()
@@ -164,7 +224,9 @@ object Checker extends Properties("MarkovAssumption") {
 }
 
 
-object VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("MarkovAssumption") {
+
+
+object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("MarkovAssumption") {
 
 	/**
 	 * Verifying that markov assumption (in one of the cases where it applies like below is F2, S2 in specs file)
