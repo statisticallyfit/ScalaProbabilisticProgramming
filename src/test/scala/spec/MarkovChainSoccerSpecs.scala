@@ -77,7 +77,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			assert(notAllSame(possessProbPrior, possessProbZERO))
 
 
-			assert(allDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
+			assert(someDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
 				notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
 					"INDIVIDUAL observations of possession")
@@ -370,7 +370,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			assert(notAllSame(possessProbPrior, possessProbNINE))
 			assert(notAllSame(possessProbPrior, possessProbTEN))
 
-			assert(allDifferent(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN) ||
+			assert(someDifferent(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN) ||
 				notAllSame(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
 					"INDIVIDUAL observations of possession")

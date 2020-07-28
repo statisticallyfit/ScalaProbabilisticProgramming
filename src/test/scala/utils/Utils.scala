@@ -6,17 +6,12 @@ package utils
 object Utils {
 
 
-	final val TOLERANCE: Double = 1.0E-6 // tested with getMaxTol function
+	final val TOLERANCE: Double = 1E-15 // (fourteen zeros) //1.0E-6 // tested with getMaxTol function
+	// NOTE: lower tolerance makes it easier for nums to be approx equal, imposes less strict restriction.
 
 
-	/**
-	 * Simple check to see if the given elements are all distinct or not
-	 * @param elements
-	 * @return
-	 */
-	def allDifferent(elements: Double*): Boolean = {
-		List(elements).distinct.length == List(elements).length
-	}
+
+
 
 	def twoApproxEqual(num1: Double, num2: Double, precision: Double = TOLERANCE): Boolean = {
 		//Console.println(s"approxEqual(): Comparing num1 = $num1 and num2 = $num2")
@@ -40,6 +35,25 @@ object Utils {
 	def getMaxTol(xs: Double*): Double = {
 		xs.combinations(n = 2).map { case Seq(num1, num2) => (num1 - num2).abs }.max
 	}
+
+
+
+	/**
+	 * Simple check to see if the given elements are all distinct or not
+	 *
+	 * Checks that not all the elements are the same (with no tolerance, so if find any strictly different then
+	 * returns true else false.
+	 *
+	 * @param elements
+	 * @return
+	 */
+	def someDifferent(elements: Double*): Boolean = {
+		if(elements.toList.isEmpty || elements.length ==1) return true
+
+		// Else do the main logic
+		List(elements).distinct.length == List(elements).length
+	}
+
 
 	/**
 	 * Checks that all elements are either never equal to one another, or there are some equal ones among them but

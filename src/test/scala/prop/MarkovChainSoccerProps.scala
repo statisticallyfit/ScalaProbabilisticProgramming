@@ -20,7 +20,7 @@ import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language.Element
 
 import scala.collection.mutable.ListBuffer
-
+import scala.util.Random
 
 
 object MarkovChainSoccerProps {
@@ -126,7 +126,7 @@ object MarkovChainSoccerProps {
 
 			// Create list of points in time such that they are less than current time (so in the past) but also
 			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
-			val exclusivePastTimes: Seq[DiscreteTime] = (0 until (currentTime - 1)) //exclusive endpoint
+			val exclusivePastTimes: Seq[DiscreteTime] = (1 until (currentTime - 1)) //exclusive endpoint
 
 
 			// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
@@ -176,7 +176,7 @@ object MarkovChainSoccerProps {
 				val possessProb: Probability =
 					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
 
-				probsList(OBS_RANDOM) += possessProb
+				probsList(OBS_RANDOM) += (time, possessProb)
 			}
 
 
@@ -207,6 +207,100 @@ object MarkovChainSoccerProps {
 
 	}
 
+
+
+
+
+
+	// Test: inclusive / immediate time past (<= currentTime - 1)
+
+	val testInclCumulObservations = forAll(genCurrentTime, genHaveBall) {
+
+		(currentTime: Int, haveBall: Boolean) =>
+
+			Console.println(s"\nITERATION = $counter | currentTime = $currentTime | haveBall = $haveBall")
+			// ---------------------
+
+
+			// Create the markov chain
+			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
+			var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+			// Create list to store the observed probabilities of soccer ball possession at current time, after
+			// observations
+			// Contains list of list, where inner list is specific to how the observations happened in time.
+			//val probsList: List[ListBuffer[Probability]] = List.fill[ListBuffer[Probability]](NUM_WAYS_TO_OBSERVE)(ListBuffer())
+			val probsList: ListBuffer[Probability] = ListBuffer()
+
+
+			// Create list of points in time such that they are less than current time (so in the past) but also
+			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
+			val inclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
+
+
+			// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
+			val priorProb: Probability =
+				VariableElimination.probability(possessionVar(currentTime), HAVE_BALL_AT_CURR_TIME)
+
+
+			// Shuffle the times so we can observe the ball posession at random order of times.
+			val randTimes = Random.shuffle(inclusivePastTimes)
+
+			for { time <- randTimes } {
+
+				possessionVar(time).observe(haveBall)
+
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
+
+				probsList += possessProb // (time, possessProb)
+			}
+
+			val timeProbPairs: List[(DiscreteTime, Probability)] = randTimes.zip(probsList).toList
+
+
+
+			// DEBUGGING --------------------------------------------------------------------------
+			Console.println(s"times = ${inclusivePastTimes.mkString(", ")}")
+			Console.println(s"observed probs = ${timeProbPairs.mkString("\n")}")
+
+			counter += 1
+			// The test: asserting that not all of these probabilities in the list should be the same:
+
+			// DEBUGGING --------------------------------------------------------------------------------
+
+			// Test 1: check the prior prob is not the same with EACH of the other possession probs
+			//val result1 = probsList.forall(list => list.forall(obsProb => notAllSame(obsProb, priorProb)))
+			val nonMarkovProbs: List[Probability] = timeProbPairs
+				.takeWhile{case (time, prob) => time != currentTime - 1}
+     			.map(_._2) // get just probabilities where time is not the current - 1
+
+			val markovProbs: List[Probability] = timeProbPairs
+     			.dropWhile { case (time, prob) => time != currentTime - 1}
+     			.map(_._2)
+
+			// Test 1: assert that all the observations made before currentime will be different (not all same)
+			//assert( someDifferent(nonMarkovProbs:_*) )
+			//assert( notAllSame(nonMarkovProbs:_*) )
+			val result1 = someDifferent(nonMarkovProbs:_*)
+			val result2 = notAllSame(nonMarkovProbs:_*)
+			// Test 2: assert that all observations made after the immediate time after current will have same
+			// (approx equal) probabilities
+			//assert( approxEqual(markovProbs:_*) )
+			val result3 = approxEqual(markovProbs:_*)
+
+
+			// DEBUGGING --------------------------------------------------------------------------------
+
+			Console.println(s"ITERATION = ${counter - 1} \n\t| currentTime = $currentTime \n\t| haveBall = $haveBall " +
+				s"\n\t| someDiff = ${result1} \n\t| notAllSame = $result2 \n\t | approxEqualObservedProbs = " +
+				s"$result3")
+
+
+			(result1 || result2) && result3
+
+	}
+
 }
 
 
@@ -215,10 +309,31 @@ object Checker extends Properties("MarkovAssumption") {
 	import MarkovChainSoccerProps._
 
 	//testExclSeparObservations.check()
-	testExclCumulObservations.check()
+	//testExclCumulObservations.check()
 
-	//propExclusiveCumulativePossessions.check()
-	// Test: inclusive / immediate time past (<= currentTime - 1)
+	testInclCumulObservations.check()
+
+	//NOTES:
+	// 1) markov chain (curr time) needs to be longer for us to see BIG ENOUGH differences in the numbers when not
+	// observing first the next immediate state (the larger the chain, the more similar the numbers are even before
+	// the immediate state is observed, so harder to see if the test of immediacy is achieved). Test smaller and
+	// larger markov chains (5 vs length 90)
+	// ----> if length <= 5 ASSERT that  smallest difference between numbers is LARGER than largest difference
+	//  between numbers when length >= 90
+
+	// 2) need to test observing the immediate state, then see how similar the numbers are. (use approx equal for
+	// this test)
+
+	// 3) can use incr + order and random order and decr + order only after first conditioning on the immediate next
+	// state.
+
+	// 4) can then test any order but check specifically: AFTER the next immediate state is observed, ASSERT that
+	// all the consequent probabilities are APPROX EQUAL.
+	// and that in total everything is NOT ALL SAME.
+	// and that BEFORE everything is NOT ALL SAME.
+
+	// 5) for non-immediate tests, assert the NOT ALL SAME numbers test, all the way.
+
 
 	// Choose the number above (future) the current time in a dynamic way ...
 	// ... for non-immediate future (> currentTime + 1)
@@ -241,7 +356,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 	var counter = 0
 	val currentTime = 15
 	val haveBall = true
-	CHAIN_LENGTH = 20
+	//CHAIN_LENGTH = 20
 
 
 
