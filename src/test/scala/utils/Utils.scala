@@ -22,6 +22,11 @@ object Utils {
 
 
 	def equalWithTolerance(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
+
+		// First error check
+		if(xs.isEmpty || xs.length == 1) return true
+
+		// Else continue checking
 		xs.combinations(n = 2).forall{ case Seq(e1, e2) => twoApproxEqual(e1, e2, precision = precision)}
 	}
 

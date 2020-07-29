@@ -213,9 +213,12 @@ object MarkovChainSoccerProps {
 
 	// Test: inclusive / immediate time past (<= currentTime - 1)
 
-	val testInclusiveIndependentObservationsDontFollowMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
+	val testInclusiveIndependentObservationsDisobeyMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
 
 		(currentTime: Int, haveBall: Boolean) =>
+
+			Console.println()
+
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
@@ -251,7 +254,16 @@ object MarkovChainSoccerProps {
 				possessionVar(time).unobserve() // the separate / non-cumulative aspect
 
 				probsList += possessProb
+
+
+				// LOGGING
+				Console.println(s"(F2, S1) Probability of possession at t = $currentTime " +
+					s"| observe possession at t = $time: \t$possessProb")
+
 			}
+
+			//val timeProbPairs: List[(DiscreteTime, Probability)] = randTimes.zip(probsList).toList
+
 
 
 			// TESTING
@@ -262,14 +274,27 @@ object MarkovChainSoccerProps {
 				probsList.forall(obsProb => notAllSame(obsProb, priorProb) || notAllSameWithTolerance(obsProb, priorProb))
 
 			// Test 2: check at least one pair of observed probs is different from the other.
-			//val areObsProbsNotAllSame: Boolean = notAllSame(probsList:_*)
+			val areObsProbsNotAllSame: Boolean = notAllSame(probsList:_*)
 			// Test 3: check at least one pair of observed probs is different from each other.
-			//val areObsProbsNotAllSameWithTol = notAllSameWithTolerance(probsList:_*)
+			val areObsProbsNotAllSameWithTol = notAllSameWithTolerance(probsList:_*)
 
+			val notequal = if(probsList.length == 1) true else ! equalWithTolerance(probsList:_*)
+
+			Console.println(s"probslist = ${probsList}" +
+				s"\n\t| arepairwiseDiff = $arePriorAndObservedProbsPairwiseDifferent " +
+				s"\n\t| areNotAllSame = $areObsProbsNotAllSame" +
+				s"\n\t| areNotAllSameTOL = $areObsProbsNotAllSameWithTol" +
+				s"\n\t| notEqual = $notequal")
+
+			// Test 3: assert not all pairwise equal (with tolerance)
+
+			/*arePriorAndObservedProbsPairwiseDifferent &&
+				(notAllSame(probsList:_*) || notAllSameWithTolerance(probsList:_*)) &&
+				! equalWithTolerance(probsList:_* )*/
 
 			arePriorAndObservedProbsPairwiseDifferent &&
-				(notAllSame(probsList:_*) || notAllSameWithTolerance(probsList:_*))
-
+				(areObsProbsNotAllSame || areObsProbsNotAllSameWithTol) &&
+			 	notequal
 	}
 
 
@@ -364,7 +389,7 @@ object Checker extends Properties("MarkovAssumption") {
 	// DONE//testInclCumulObservations.check()
 
 	// TESTING
-	testInclusiveIndependentObservationsDontFollowMarkovAssumption.check()
+	testInclusiveIndependentObservationsDisobeyMarkovAssumption.check()
 
 	//NOTES:
 	// 1) markov chain (curr time) needs to be longer for us to see BIG ENOUGH differences in the numbers when not

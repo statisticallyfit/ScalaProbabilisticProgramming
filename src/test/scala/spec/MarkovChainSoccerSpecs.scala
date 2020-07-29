@@ -188,28 +188,28 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 
 
-			When("observe ball possession SEPARATELY at earlier times (t = 3, 2, 1 ...) excluding the immediately" +
-				"preceding time t = 4 ...")
+			When("observe ball possession SEPARATELY at earlier times (t = 3, 2, 1 ...)  ...")
 
-			possessionVar(3).observe(true)
-			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(3).unobserve()
-
-			possessionVar(2).observe(false)
-			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(2).unobserve()
 
 			possessionVar(1).observe(true)
 			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).unobserve()
 
+			possessionVar(3).observe(true)
+			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(3).unobserve()
+
 			possessionVar(0).observe(false)
 			val possessProbZERO = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(0).unobserve()
 
+			possessionVar(2).observe(false)
+			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
+			possessionVar(2).unobserve()
 
 
-			Then("the new observations don't change the probability of possession at t = 5.")
+
+			Then("the new observations DO NOT change the probability of possession at t = 5.")
 
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbFOUR))
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
@@ -217,14 +217,19 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
-			assert(List(possessProbFOUR,
+			/*assert(List(possessProbFOUR,
 				possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
-				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))
+				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))*/
+
 
 			assert(
-				equalWithTolerance(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
+				equalWithTolerance(possessProbFOUR,
+					possessProbTHREE,
+					possessProbTWO,
+					possessProbONE,
+					possessProbZERO)
 			)
 
 
@@ -262,14 +267,17 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			When("observe ball possession CUMULATIVELY at earlier times t = 3, 2, 1, 0...")
 
-			possessionVar(3).observe(true)
-			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(2).observe(false)
-			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).observe(true)
-			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
+			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
+
+			possessionVar(3).observe(true)
+			val possessProbTHREE = VariableElimination.probability(possessionVar(5), true)
+
 			possessionVar(0).observe(false)
-			val possessProbZERO: Double = VariableElimination.probability(possessionVar(5), true)
+			val possessProbZERO = VariableElimination.probability(possessionVar(5), true)
+
+			possessionVar(2).observe(false)
+			val possessProbTWO = VariableElimination.probability(possessionVar(5), true)
 
 
 
@@ -285,11 +293,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 				equalWithTolerance(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
 			)
 
-			assert(List(possessProbFOUR,
+			/*assert(List(possessProbFOUR,
 				possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
-				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))
+				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))*/
 
 
 			Console.println(s"\n(F2, S2) Prior probability of possession at t = 5: \t $possessProbPrior")
