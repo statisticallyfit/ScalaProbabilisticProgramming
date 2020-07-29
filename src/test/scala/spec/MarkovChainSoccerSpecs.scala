@@ -71,14 +71,14 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbTHREE))
-			assert(notAllSame(possessProbPrior, possessProbTWO))
-			assert(notAllSame(possessProbPrior, possessProbONE))
-			assert(notAllSame(possessProbPrior, possessProbZERO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
 
-			assert(someDifferent(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
-				notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
+			assert(notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
+				notAllSameWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
 					"INDIVIDUAL observations of possession")
 
@@ -127,17 +127,17 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbTHREE))
-			assert(notAllSame(possessProbPrior, possessProbTWO))
-			assert(notAllSame(possessProbPrior, possessProbONE))
-			assert(notAllSame(possessProbPrior, possessProbZERO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
 			assert(List(possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
 				possessProbZERO).forall(prob => prob === (0.48 +- TOLERANCE)))
 
-			assert(approxEqual(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
+			assert(equalWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
 
 
 			Console.println(s"\n(F1, S2) Prior probability of possession at t = 5: \t $possessProbPrior")
@@ -211,11 +211,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbFOUR))
-			assert(notAllSame(possessProbPrior, possessProbTHREE))
-			assert(notAllSame(possessProbPrior, possessProbTWO))
-			assert(notAllSame(possessProbPrior, possessProbONE))
-			assert(notAllSame(possessProbPrior, possessProbZERO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbFOUR))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
 			assert(List(possessProbFOUR,
 				possessProbTHREE,
@@ -224,7 +224,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))
 
 			assert(
-				approxEqual(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
+				equalWithTolerance(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
 			)
 
 
@@ -275,14 +275,14 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbFOUR))
-			assert(notAllSame(possessProbPrior, possessProbTHREE))
-			assert(notAllSame(possessProbPrior, possessProbTWO))
-			assert(notAllSame(possessProbPrior, possessProbONE))
-			assert(notAllSame(possessProbPrior, possessProbZERO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbFOUR))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
 			assert(
-				approxEqual(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
+				equalWithTolerance(possessProbFOUR, possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
 			)
 
 			assert(List(possessProbFOUR,
@@ -365,13 +365,13 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbSEVEN))
-			assert(notAllSame(possessProbPrior, possessProbEIGHT))
-			assert(notAllSame(possessProbPrior, possessProbNINE))
-			assert(notAllSame(possessProbPrior, possessProbTEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSEVEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbEIGHT))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
-			assert(someDifferent(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN) ||
-				notAllSame(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN),
+			assert(notAllSame(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN) ||
+				notAllSameWithTolerance(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN),
 				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
 					"INDIVIDUAL observations of possession")
 
@@ -425,13 +425,13 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbSEVEN))
-			assert(notAllSame(possessProbPrior, possessProbEIGHT))
-			assert(notAllSame(possessProbPrior, possessProbNINE))
-			assert(notAllSame(possessProbPrior, possessProbTEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSEVEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbEIGHT))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
 			assert(
-				approxEqual(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
+				equalWithTolerance(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
 			)
 
 			assert(List(possessProbSEVEN,
@@ -512,11 +512,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbSIX))
-			assert(notAllSame(possessProbPrior, possessProbSEVEN))
-			assert(notAllSame(possessProbPrior, possessProbEIGHT))
-			assert(notAllSame(possessProbPrior, possessProbNINE))
-			assert(notAllSame(possessProbPrior, possessProbTEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSIX))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSEVEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbEIGHT))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
 			assert(List(possessProbSIX,
 				possessProbSEVEN,
@@ -525,7 +525,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 				possessProbTEN).forall(prob => prob === (0.6001700793353608 +- TOLERANCE)))
 
 			assert(
-				approxEqual(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
+				equalWithTolerance(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
 			)
 
 
@@ -582,11 +582,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations don't change the probability of possession at t = 5.")
 
-			assert(notAllSame(possessProbPrior, possessProbSIX))
-			assert(notAllSame(possessProbPrior, possessProbSEVEN))
-			assert(notAllSame(possessProbPrior, possessProbEIGHT))
-			assert(notAllSame(possessProbPrior, possessProbNINE))
-			assert(notAllSame(possessProbPrior, possessProbTEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSIX))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbSEVEN))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbEIGHT))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
+			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
 			assert(List(possessProbSIX,
 				possessProbSEVEN,
@@ -595,7 +595,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 				possessProbTEN).forall(prob => prob === (0.6001700793353607 +- TOLERANCE)))
 
 			assert(
-				approxEqual(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
+				equalWithTolerance(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
 			)
 
 

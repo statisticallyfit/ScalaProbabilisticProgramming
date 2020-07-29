@@ -21,7 +21,7 @@ object Utils {
 	}
 
 
-	def approxEqual(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
+	def equalWithTolerance(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
 		xs.combinations(n = 2).forall{ case Seq(e1, e2) => twoApproxEqual(e1, e2, precision = precision)}
 	}
 
@@ -39,7 +39,8 @@ object Utils {
 
 
 	/**
-	 * Simple check to see if the given elements are all distinct or not
+	 * Checks: at least ONE pair of elements (from two-way combinations) are different from each other (strictly, no
+	 * tolerance)
 	 *
 	 * Checks that not all the elements are the same (with no tolerance, so if find any strictly different then
 	 * returns true else false.
@@ -47,7 +48,7 @@ object Utils {
 	 * @param elements
 	 * @return
 	 */
-	def someDifferent(elements: Double*): Boolean = {
+	def notAllSame(elements: Double*): Boolean = {
 		if(elements.toList.isEmpty || elements.length ==1) return true
 
 		// Else do the main logic
@@ -61,11 +62,14 @@ object Utils {
 	 *
 	 * Never returns TRUE when all the elements are equal
 	 *
+	 * Checks there is at least ONE pair of elements (from two-way combinations) that are NOT equal to each other
+	 * (with tolerance)
+	 *
 	 * @param xs
 	 * @param precision
 	 * @return
 	 */
-	def notAllSame(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
+	def notAllSameWithTolerance(xs: Double*)(implicit precision: Double = TOLERANCE): Boolean = {
 
 		// First do error checking:
 

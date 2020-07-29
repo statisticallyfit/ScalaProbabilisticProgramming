@@ -97,7 +97,7 @@ object MarkovChainSoccerProps {
 
 			// The test, checking that all the probabilities of possession should not necessarily be all equal, as
 			// they are for other test cases.
-			notAllSame(listOfPossessProbs: _*)
+			notAllSameWithTolerance(listOfPossessProbs: _*)
 
 	}
 
@@ -190,11 +190,11 @@ object MarkovChainSoccerProps {
 			// DEBUGGING --------------------------------------------------------------------------------
 
 			// Test 1: check the prior prob is not the same with EACH of the other possession probs
-			val result1 = probsList.forall(list => list.forall(obsProb => notAllSame(obsProb, priorProb)))
+			val result1 = probsList.forall(list => list.forall(obsProb => notAllSameWithTolerance(obsProb, priorProb)))
 
 
 			// Test 2:assert that all the observed probs are approximately equal
-			val result2 = probsList.forall(list => approxEqual(list:_*))
+			val result2 = probsList.forall(list => equalWithTolerance(list:_*))
 
 
 			// DEBUGGING --------------------------------------------------------------------------------
@@ -211,20 +211,15 @@ object MarkovChainSoccerProps {
 
 
 
-
 	// Test: inclusive / immediate time past (<= currentTime - 1)
 
-	val testInclCumulObservations = forAll(genCurrentTime, genHaveBall) {
+	val testInclusiveIndependentObservationsDontFollowMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
 
 		(currentTime: Int, haveBall: Boolean) =>
 
-			Console.println(s"\nITERATION = $counter | currentTime = $currentTime | haveBall = $haveBall")
-			// ---------------------
-
-
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
@@ -253,6 +248,69 @@ object MarkovChainSoccerProps {
 				val possessProb: Probability =
 					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
 
+				possessionVar(time).unobserve() // the separate / non-cumulative aspect
+
+				probsList += possessProb
+			}
+
+
+			// TESTING
+
+			// Test 1: check that all the probabilities are not really equal to each other (either some different
+			// (>= 1 differs) or not all same (<= NUM differs)
+			val arePriorAndObservedProbsPairwiseDifferent: Boolean =
+				probsList.forall(obsProb => notAllSame(obsProb, priorProb) || notAllSameWithTolerance(obsProb, priorProb))
+
+			// Test 2: check at least one pair of observed probs is different from the other.
+			//val areObsProbsNotAllSame: Boolean = notAllSame(probsList:_*)
+			// Test 3: check at least one pair of observed probs is different from each other.
+			//val areObsProbsNotAllSameWithTol = notAllSameWithTolerance(probsList:_*)
+
+
+			arePriorAndObservedProbsPairwiseDifferent &&
+				(notAllSame(probsList:_*) || notAllSameWithTolerance(probsList:_*))
+
+	}
+
+
+
+
+	// Test: inclusive / immediate time past (<= currentTime - 1)
+
+	val testInclusiveDependentObservationsObeyMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
+
+		(currentTime: Int, haveBall: Boolean) =>
+
+			// Create the markov chain
+			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
+			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+
+			// Create list to store the observed probabilities of soccer ball possession at current time, after
+			// observations
+			// Contains list of list, where inner list is specific to how the observations happened in time.
+			//val probsList: List[ListBuffer[Probability]] = List.fill[ListBuffer[Probability]](NUM_WAYS_TO_OBSERVE)(ListBuffer())
+			val probsList: ListBuffer[Probability] = ListBuffer()
+
+
+			// Create list of points in time such that they are less than current time (so in the past) but also
+			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
+			val inclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
+
+
+			// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
+			val priorProb: Probability = VariableElimination.probability(possessionVar(currentTime), HAVE_BALL_AT_CURR_TIME)
+
+
+			// Shuffle the times so we can observe the ball posession at random order of times.
+			val randTimes = Random.shuffle(inclusivePastTimes)
+
+			for { time <- randTimes } {
+
+				possessionVar(time).observe(haveBall)
+
+				val possessProb: Probability =
+					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
+
 				probsList += possessProb // (time, possessProb)
 			}
 
@@ -260,17 +318,15 @@ object MarkovChainSoccerProps {
 
 
 
-			// DEBUGGING --------------------------------------------------------------------------
-			Console.println(s"times = ${inclusivePastTimes.mkString(", ")}")
-			Console.println(s"observed probs = ${timeProbPairs.mkString("\n")}")
 
-			counter += 1
-			// The test: asserting that not all of these probabilities in the list should be the same:
-
-			// DEBUGGING --------------------------------------------------------------------------------
+			// TESTING
 
 			// Test 1: check the prior prob is not the same with EACH of the other possession probs
-			//val result1 = probsList.forall(list => list.forall(obsProb => notAllSame(obsProb, priorProb)))
+			val arePriorAndObservedProbsPairwiseDifferent: Boolean =
+				probsList.forall(obsProb => notAllSame(obsProb, priorProb) || notAllSameWithTolerance(obsProb, priorProb))
+
+
+			// Test 2: assert that all the observations made before currentime will be different (not all same)
 			val nonMarkovProbs: List[Probability] = timeProbPairs
 				.takeWhile{case (time, prob) => time != currentTime - 1}
      			.map(_._2) // get just probabilities where time is not the current - 1
@@ -279,25 +335,19 @@ object MarkovChainSoccerProps {
      			.dropWhile { case (time, prob) => time != currentTime - 1}
      			.map(_._2)
 
-			// Test 1: assert that all the observations made before currentime will be different (not all same)
-			//assert( someDifferent(nonMarkovProbs:_*) )
-			//assert( notAllSame(nonMarkovProbs:_*) )
-			val result1 = someDifferent(nonMarkovProbs:_*)
-			val result2 = notAllSame(nonMarkovProbs:_*)
-			// Test 2: assert that all observations made after the immediate time after current will have same
-			// (approx equal) probabilities
-			//assert( approxEqual(markovProbs:_*) )
-			val result3 = approxEqual(markovProbs:_*)
+
+			val areNonMarkovsDifferent: Boolean =
+				notAllSame(nonMarkovProbs:_*) || notAllSameWithTolerance(nonMarkovProbs:_*)
 
 
-			// DEBUGGING --------------------------------------------------------------------------------
-
-			Console.println(s"ITERATION = ${counter - 1} \n\t| currentTime = $currentTime \n\t| haveBall = $haveBall " +
-				s"\n\t| someDiff = ${result1} \n\t| notAllSame = $result2 \n\t | approxEqualObservedProbs = " +
-				s"$result3")
+			// Test 3: assert that all observations made after the immediate time after current will have same
+			val areMarkovsEqual: Boolean = equalWithTolerance(markovProbs:_*)
 
 
-			(result1 || result2) && result3
+			arePriorAndObservedProbsPairwiseDifferent &&
+				areNonMarkovsDifferent &&
+				areMarkovsEqual
+
 
 	}
 
@@ -308,10 +358,13 @@ object Checker extends Properties("MarkovAssumption") {
 
 	import MarkovChainSoccerProps._
 
-	//testExclSeparObservations.check()
-	//testExclCumulObservations.check()
+	// TESTING //testExclSeparObservations.check()
+	// TESTING //testExclCumulObservations.check()
 
-	testInclCumulObservations.check()
+	// DONE//testInclCumulObservations.check()
+
+	// TESTING
+	testInclusiveIndependentObservationsDontFollowMarkovAssumption.check()
 
 	//NOTES:
 	// 1) markov chain (curr time) needs to be longer for us to see BIG ENOUGH differences in the numbers when not
@@ -408,11 +461,11 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		// DEBUGGING --------------------------------------------------------------------------------
 
 		// Test 1: check the prior prob is not the same with EACH of the other possession probs
-		val result1 = listOfPossessProbs.forall(obsProb => notAllSame(obsProb, priorProb))
+		val result1 = listOfPossessProbs.forall(obsProb => notAllSameWithTolerance(obsProb, priorProb))
 
 
 		// Test 2:assert that all the observed probs are approximately equal
-		val result2 = approxEqual(listOfPossessProbs: _*)
+		val result2 = equalWithTolerance(listOfPossessProbs: _*)
 
 
 		// DEBUGGING --------------------------------------------------------------------------------
@@ -440,7 +493,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 
 		println(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO)
-		println("approx equal = " + approxEqual(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
+		println("approx equal = " + equalWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
 
 		// ----------------------------
 		println("\n Testing manually 2")
@@ -460,7 +513,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 
 		println(possessProbTHREE2, possessProbTWO2, possessProbONE2, possessProbZERO2)
-		println("approx equal " + approxEqual(possessProbTHREE2, possessProbTWO2, possessProbONE2, possessProbZERO2))
+		println("approx equal " + equalWithTolerance(possessProbTHREE2, possessProbTWO2, possessProbONE2, possessProbZERO2))
 
 
 		// ----------------------------
@@ -478,7 +531,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		val possessProbTHREE3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
 
 		println(possessProbTHREE3, possessProbTWO3, possessProbONE3, possessProbZERO3)
-		println("approx equal " + approxEqual(possessProbTHREE3, possessProbTWO3, possessProbONE3, possessProbZERO3))
+		println("approx equal " + equalWithTolerance(possessProbTHREE3, possessProbTWO3, possessProbONE3, possessProbZERO3))
 
 
 		// ---------------------------------------------------
@@ -498,7 +551,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 
 		println(possessProbTHREE4, possessProbTWO4, possessProbONE4, possessProbZERO4)
-		println("approx equal = " + approxEqual(possessProbTHREE4, possessProbTWO4, possessProbONE4,
+		println("approx equal = " + equalWithTolerance(possessProbTHREE4, possessProbTWO4, possessProbONE4,
 			possessProbZERO4))
 
 
@@ -520,7 +573,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 
 		println(possessProbTHREE5, possessProbTWO5, possessProbONE5, possessProbZERO5)
-		println("approx equal " + approxEqual(possessProbTHREE5, possessProbTWO5, possessProbONE5, possessProbZERO5))
+		println("approx equal " + equalWithTolerance(possessProbTHREE5, possessProbTWO5, possessProbONE5, possessProbZERO5))
 
 
 		// ----------------------------
@@ -538,7 +591,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		val possessProbTHREE6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
 
 		println(possessProbTHREE6, possessProbTWO6, possessProbONE6, possessProbZERO6)
-		println("approx equal " + approxEqual(possessProbTHREE6, possessProbTWO6, possessProbONE6, possessProbZERO6))
+		println("approx equal " + equalWithTolerance(possessProbTHREE6, possessProbTWO6, possessProbONE6, possessProbZERO6))
 
 	}
 
