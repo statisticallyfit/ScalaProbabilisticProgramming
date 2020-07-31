@@ -5,22 +5,15 @@ package utils
  */
 object Logger {
 
-	def log(tag: String,
-		   skipLineAfterTag: Boolean = true,
-		   generalMessage: String = "")(messageItems: (String, Any)*): Unit = {
+	def log(tag: String = "")(skipLineAfterTag: Boolean = true)(messageItems: (String, Any)*): Unit = {
 
-		val strMsg: String = messageItems.map {case (str, any) => s"\t> $str: \t $any"}.mkString("\n")
+		val strMsg: String = messageItems.map {case (str, any) => s"> $str: \t $any"}.mkString("\n\t")
 
-		if(generalMessage.isEmpty){
+		if(! tag.isEmpty){ // then need to always skip line after non-empty tag, so skip line is essentially true here
+			Console.println(s"$tag \n\t$strMsg")
 
-			if(skipLineAfterTag){
-				Console.println(s"$tag \n$strMsg")
-			} else {
-				Console.println(s"$tag $strMsg")
-			}
-
-		} else {
-			Console.println(s"$tag \n$generalMessage \n$strMsg")
+		} else { // else if the tag IS empty, then no need to skip the line
+			Console.println(s"$tag \t$strMsg")
 		}
 	}
 }

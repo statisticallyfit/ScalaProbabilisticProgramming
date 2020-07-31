@@ -168,7 +168,7 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			notAllSameWithTolerance(possessProbPrior, possessProbONE) should be(true)
 			notAllSameWithTolerance(possessProbPrior, possessProbZERO) should be(true)
 
-			
+
 			And("the observed probabilities may not be equal amongst themselves. ")
 			(notAllSame(possessProbTHREE,
 				possessProbTWO,
@@ -217,11 +217,13 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 
 		// INDEPENDENT + FOUR
-		Scenario("Markov Assumption applies: " +
+		Scenario("Markov Assumption does NOT apply: " +
 			"Given observed possession at t = 4, new SEPARATE observations of possession at t = 3, 2, 1, 0 do" +
-			" not change the probability of possession at t = 5. " +
-			"Markov assumption implies that probability of possession at t = 5 is INDEPENDENT of probability of " +
-			"possession at t = 3, 2, 1, 0, given observed possession at t = 4. ")  {
+			" may change the probability of possession at t = 5. " +
+			"Markov assumption implies that probability of possession at t = 5 is not independent of probability " +
+			"of possession at t = 3, 2, 1, 0, when using independent observations, given observed possession at t " +
+			"= 4. " +
+			"")  {
 
 
 			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
@@ -302,7 +304,8 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			"Given observed possession at t = 4, new CUMULATIVE observations of possession at t = 4, 3, 2, 1, 0 do" +
 			" not change the probability of possession at t = 5. " +
 			"Markov assumption implies that probability of possession at t = 5 is INDEPENDENT of probability of " +
-			"possession at t = 4, 3, 2, 1, 0, given observed possession at t = 4. ")  {
+			"possession at t = 4, 3, 2, 1, 0, when using dependent observations, given observed possession at t = " +
+			"4. ")  {
 
 
 			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
