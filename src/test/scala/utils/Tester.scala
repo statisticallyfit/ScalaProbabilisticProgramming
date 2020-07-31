@@ -3,7 +3,7 @@ package utils
 /**
  *
  */
-object Utils {
+object Tester {
 
 
 	final val TOLERANCE: Double = 1E-15 // (fourteen zeros) //1.0E-6 // tested with getMaxTol function
@@ -96,3 +96,5 @@ object Utils {
 		! wereAllPairsEqual
 	}
 }
+
+

@@ -1,10 +1,5 @@
 package prop
 
-/**
- *
- */
-
-
 
 import org.scalacheck._
 import Prop.{forAll, propBoolean}
@@ -12,15 +7,24 @@ import Gen._
 import Arbitrary.arbitrary
 
 
-import MarkovChain.Listing_8_1_MarkovChainSoccer._
-import utils.Utils._
+import org.specs2.control.Debug
 
+
+import MarkovChain.Listing_8_1_MarkovChainSoccer._
+import utils._
+import utils.Tester._
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language.Element
 
+
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
+
+/**
+ *
+ */
+
 
 
 object MarkovChainSoccerProps {
@@ -278,13 +282,10 @@ object MarkovChainSoccerProps {
 			// Test 3: check at least one pair of observed probs is different from each other.
 			val areObsProbsNotAllSameWithTol = notAllSameWithTolerance(probsList:_*)
 
-			val notequal = if(probsList.length == 1) true else ! equalWithTolerance(probsList:_*)
+			val notEqualWithTolerance = if(probsList.length == 1) true else ! equalWithTolerance(probsList:_*)
 
-			Console.println(s"probslist = ${probsList}" +
-				s"\n\t| arepairwiseDiff = $arePriorAndObservedProbsPairwiseDifferent " +
-				s"\n\t| areNotAllSame = $areObsProbsNotAllSame" +
-				s"\n\t| areNotAllSameTOL = $areObsProbsNotAllSameWithTol" +
-				s"\n\t| notEqual = $notequal")
+
+
 
 			// Test 3: assert not all pairwise equal (with tolerance)
 
@@ -292,9 +293,17 @@ object MarkovChainSoccerProps {
 				(notAllSame(probsList:_*) || notAllSameWithTolerance(probsList:_*)) &&
 				! equalWithTolerance(probsList:_* )*/
 
+			Logger.log(tag = "(F2, S1)")(
+				("probsList", probsList),
+				("arePairwiseDiff", arePriorAndObservedProbsPairwiseDifferent),
+				("areNotAllSame", areObsProbsNotAllSame),
+				("areNotAllSameWithTolerance", areObsProbsNotAllSameWithTol),
+				("notEqual", notEqualWithTolerance)
+			)
+
 			arePriorAndObservedProbsPairwiseDifferent &&
 				(areObsProbsNotAllSame || areObsProbsNotAllSameWithTol) &&
-			 	notequal
+			 	notEqualWithTolerance
 	}
 
 
@@ -334,7 +343,7 @@ object MarkovChainSoccerProps {
 				possessionVar(time).observe(haveBall)
 
 				val possessProb: Probability =
-					VariableElimination.probability(possessionVar(currentTime),HAVE_BALL_AT_CURR_TIME)
+					VariableElimination.probability(possessionVar(currentTime), HAVE_BALL_AT_CURR_TIME)
 
 				probsList += possessProb // (time, possessProb)
 			}

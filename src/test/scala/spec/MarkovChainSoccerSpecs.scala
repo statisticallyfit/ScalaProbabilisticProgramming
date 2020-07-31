@@ -2,8 +2,15 @@ package spec
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language._
+
 import org.scalatest._
 import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.GivenWhenThen
+import org.scalatest.matchers.should.Matchers
+
+// NOTE: new naming system from ShouldMatchers in version 3.2.0 of scala test = https://hyp.is/QNo6ntMLEeq2Kh8qJbyFTw/www.scalatest.org/release_notes/3.2.0
+
+//import org.specs2.matcher.ShouldMatchers
 
 //import org.scalactic.TypeCheckedTripleEquals._
 import org.scalactic.Tolerance._
@@ -12,11 +19,11 @@ import org.scalactic.Tolerance._
 
 
 
-class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
+class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhenThen {
 
 
 	import MarkovChain.Listing_8_1_MarkovChainSoccer._
-	import utils.Utils._
+	import utils.Tester._
 
 
 	info("Markov Assumption Test for Non-Immediate Past: " +
@@ -71,10 +78,10 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			Then("the new observations DO change the probability of possession at  t = 5.")
 
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
+			notAllSameWithTolerance(possessProbPrior, possessProbTHREE) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbTWO) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbONE) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbZERO) should be(true)
 
 
 			assert(notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
@@ -114,14 +121,18 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with GivenWhenThen {
 
 			When("observe ball possession CUMULATIVELY at earlier times t = 3, 2, 1, 0...")
 
-			possessionVar(3).observe(true)
-			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(2).observe(false)
 			val possessProbTWO: Double = VariableElimination.probability(possessionVar(5), true)
-			possessionVar(1).observe(true)
-			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
+
+			possessionVar(3).observe(true)
+			val possessProbTHREE: Double = VariableElimination.probability(possessionVar(5), true)
+
 			possessionVar(0).observe(false)
 			val possessProbZERO: Double = VariableElimination.probability(possessionVar(5), true)
+
+			possessionVar(1).observe(true)
+			val possessProbONE: Double = VariableElimination.probability(possessionVar(5), true)
+
 
 
 
