@@ -16,7 +16,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalactic.Tolerance._
 
 
-
+import utils._
 
 
 class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhenThen {
@@ -76,7 +76,13 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 
 
-			Then("the new observations DO change the probability of possession at  t = 5.")
+			Then("the new observations may change the probability of possession at t = 5.")
+
+			equalWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) should not be(true)
+
+
+			And("the prior probability of possession is not necessarily equal to any of the probability of " +
+				"possession after observation.")
 
 			notAllSameWithTolerance(possessProbPrior, possessProbTHREE) should be(true)
 			notAllSameWithTolerance(possessProbPrior, possessProbTWO) should be(true)
@@ -84,22 +90,36 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			notAllSameWithTolerance(possessProbPrior, possessProbZERO) should be(true)
 
 
-			assert(notAllSame(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) ||
-				notAllSameWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO),
-				"Probability of possession at t = 5 must be different (or at least not all the same), for " +
-					"INDIVIDUAL observations of possession")
+
+			And("the observed probabilities may not be equal amongst themselves. ")
+			(notAllSame(possessProbTHREE,
+				possessProbTWO,
+				possessProbONE,
+				possessProbZERO) ||
+
+				notAllSameWithTolerance(possessProbTHREE,
+					possessProbTWO,
+					possessProbONE,
+					possessProbZERO)) should be (true)
 
 
-			Console.println(s"\n(F1, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
-			Console.println(s"(F1, S1) Probability of possession at t = 5 | observe possession at t = 3: \t " +
-				s"$possessProbTHREE")
-			Console.println(s"(F1, S1) Probability of possession at t = 5 | observe possession at t = 2: \t " +
-				s"$possessProbTWO")
-			Console.println(s"(F1, S1) Probability of possession at t = 5 | observe possession at t = 1: \t " +
-				s"$possessProbONE")
-			Console.println(s"(F1, S1) Probability of possession at t = 5 | observe possession at t = 0: \t " +
-				s"$possessProbZERO")
+			Logger.log("(F1, S1)", false)(
+				("Prior probability of possession at t = 5", possessProbPrior)
+			)
+			Logger.log("(F1, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 3", possessProbTHREE)
+			)
+			Logger.log("(F1, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 2", possessProbTWO)
+			)
+			Logger.log("(F1, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 1", possessProbONE)
+			)
+			Logger.log("(F1, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 0", possessProbZERO)
+			)
 		}
+
 
 		// DEPENDENT + NOT FOUR
 
@@ -135,31 +155,48 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 
 
+			Then("the new observations may change the probability of possession at t = 5.")
 
-			Then("the new observations don't change the probability of possession at t = 5.")
+			equalWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO) should not be(true)
 
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
 
-			assert(List(possessProbTHREE,
+			And("the prior probability of possession is not necessarily equal to any of the probability of " +
+				"possession after observation.")
+
+			notAllSameWithTolerance(possessProbPrior, possessProbTHREE) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbTWO) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbONE) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbZERO) should be(true)
+
+			
+			And("the observed probabilities may not be equal amongst themselves. ")
+			(notAllSame(possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
-				possessProbZERO).forall(prob => prob === (0.48 +- TOLERANCE)))
+				possessProbZERO) ||
 
-			assert(equalWithTolerance(possessProbTHREE, possessProbTWO, possessProbONE, possessProbZERO))
+				notAllSameWithTolerance(possessProbTHREE,
+					possessProbTWO,
+					possessProbONE,
+					possessProbZERO)) should be (true)
 
 
-			Console.println(s"\n(F1, S2) Prior probability of possession at t = 5: \t $possessProbPrior")
-			Console.println(s"(F1, S2) Probability of possession at t = 5 | observe possession at t = 3: \t " +
-				s"$possessProbTHREE")
-			Console.println(s"(F1, S2) Probability of possession at t = 5 | observe possession at t = 2,3: \t " +
-				s"$possessProbTWO")
-			Console.println(s"(F1, S2) Probability of possession at t = 5 | observe possession at t = 1,2,3: \t " +
-				s"$possessProbONE")
-			Console.println(s"(F1, S2) Probability of possession at t = 5 | observe possession at t = 0,1,2,3: \t " +
-				s"$possessProbZERO")
+			Logger.log("(F1, S2)", false)(
+				("Prior probability of possession at t = 5", possessProbPrior)
+			)
+			Logger.log("(F1, S2)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 2", possessProbTWO)
+			)
+			Logger.log("(F1, S2)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 3,2", possessProbTHREE)
+			)
+			Logger.log("(F1, S2)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 0,3,2", possessProbZERO)
+			)
+			Logger.log("(F1, S2)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 1,0,3,2", possessProbONE)
+			)
+
 
 		}
 	}
@@ -201,7 +238,6 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 			When("observe ball possession SEPARATELY at earlier times (t = 3, 2, 1 ...)  ...")
 
-
 			possessionVar(1).observe(true)
 			val possessProbONE = VariableElimination.probability(possessionVar(5), true)
 			possessionVar(1).unobserve()
@@ -221,40 +257,42 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 
 			Then("the new observations DO NOT change the probability of possession at t = 5.")
-
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbFOUR))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTHREE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbTWO))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbONE))
-			assert(notAllSameWithTolerance(possessProbPrior, possessProbZERO))
-
-			/*assert(List(possessProbFOUR,
+			equalWithTolerance(possessProbFOUR,
 				possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
-				possessProbZERO).forall(prob => prob === (0.6 +- TOLERANCE)))*/
+				possessProbZERO) should be(true)
 
 
-			assert(
-				equalWithTolerance(possessProbFOUR,
-					possessProbTHREE,
-					possessProbTWO,
-					possessProbONE,
-					possessProbZERO)
+			And("the prior probability of possession is not necessarily equal to any of the probability of " +
+				"possession after observation.")
+
+			notAllSameWithTolerance(possessProbPrior, possessProbFOUR) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbTHREE) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbTWO) should be(true)
+			notAllSameWithTolerance(possessProbPrior, possessProbONE) should be (true)
+			notAllSameWithTolerance(possessProbPrior, possessProbZERO) should be (true)
+
+
+
+			Logger.log("(F2, S1)", false)(
+				("Prior probability of possession at t = 5", possessProbPrior)
 			)
-
-
-			Console.println(s"\n(F2, S1) Prior probability of possession at t = 5: \t $possessProbPrior")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 4: \t " +
-				s"$possessProbFOUR")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 3,4: \t " +
-				s"$possessProbTHREE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 2,4: \t " +
-				s"$possessProbTWO")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 1,4: \t " +
-				s"$possessProbONE")
-			Console.println(s"(F2, S1) Probability of possession at t = 5 | observe possession at t = 0,4: \t " +
-				s"$possessProbZERO")
+			Logger.log("(F2, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 4", possessProbFOUR)
+			)
+			Logger.log("(F2, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 1,4", possessProbONE)
+			)
+			Logger.log("(F2, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 3,4", possessProbTHREE)
+			)
+			Logger.log("(F2, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 0,4", possessProbZERO)
+			)
+			Logger.log("(F2, S1)", false)(
+				("Probability of possession at t = 5 | observe possession at t = 2,4", possessProbTWO)
+			)
 		}
 
 
@@ -453,10 +491,10 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 				equalWithTolerance(possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
 			)
 
-			assert(List(possessProbSEVEN,
+			/*assert(List(possessProbSEVEN,
 				possessProbEIGHT,
 				possessProbNINE,
-				possessProbTEN).forall(prob => prob === (0.4801768975520843 +- TOLERANCE)))
+				possessProbTEN).forall(prob => prob === (0.4801768975520843 +- TOLERANCE)))*/
 
 
 			Console.println(s"\n(F3, S2) Prior probability of possession at t = 5: \t $possessProbPrior")
@@ -537,11 +575,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
-			assert(List(possessProbSIX,
+			/*assert(List(possessProbSIX,
 				possessProbSEVEN,
 				possessProbEIGHT,
 				possessProbNINE,
-				possessProbTEN).forall(prob => prob === (0.6001700793353608 +- TOLERANCE)))
+				possessProbTEN).forall(prob => prob === (0.6001700793353608 +- TOLERANCE)))*/
 
 			assert(
 				equalWithTolerance(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)
@@ -607,11 +645,11 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbNINE))
 			assert(notAllSameWithTolerance(possessProbPrior, possessProbTEN))
 
-			assert(List(possessProbSIX,
+			/*assert(List(possessProbSIX,
 				possessProbSEVEN,
 				possessProbEIGHT,
 				possessProbNINE,
-				possessProbTEN).forall(prob => prob === (0.6001700793353607 +- TOLERANCE)))
+				possessProbTEN).forall(prob => prob === (0.6001700793353607 +- TOLERANCE)))*/
 
 			assert(
 				equalWithTolerance(possessProbSIX, possessProbSEVEN, possessProbEIGHT, possessProbNINE, possessProbTEN)

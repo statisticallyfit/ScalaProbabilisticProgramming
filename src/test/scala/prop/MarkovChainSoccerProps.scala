@@ -261,8 +261,10 @@ object MarkovChainSoccerProps {
 
 
 				// LOGGING
-				Console.println(s"(F2, S1) Probability of possession at t = $currentTime " +
-					s"| observe possession at t = $time: \t$possessProb")
+				Logger.log("(F2, S1)", false)(
+					((s"Probability of possession at t = $currentTime " +
+						s"| observe possession at t = $time",	possessProb))
+				)
 
 			}
 
@@ -388,7 +390,7 @@ object MarkovChainSoccerProps {
 }
 
 
-object Checker extends Properties("MarkovAssumption") {
+object CheckMarkovChainSoccerProps extends Properties("MarkovAssumption") {
 
 	import MarkovChainSoccerProps._
 
