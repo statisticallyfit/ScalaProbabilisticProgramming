@@ -103,19 +103,19 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 					possessProbZERO)) should be (true)
 
 
-			Logger.log("(F1, S1)", false)(
+			Logger.log("(F1, S1)")(false)(
 				("Prior probability of possession at t = 5", possessProbPrior)
 			)
-			Logger.log("(F1, S1)", false)(
+			Logger.log("(F1, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 3", possessProbTHREE)
 			)
-			Logger.log("(F1, S1)", false)(
+			Logger.log("(F1, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 2", possessProbTWO)
 			)
-			Logger.log("(F1, S1)", false)(
+			Logger.log("(F1, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 1", possessProbONE)
 			)
-			Logger.log("(F1, S1)", false)(
+			Logger.log("(F1, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 0", possessProbZERO)
 			)
 		}
@@ -181,19 +181,19 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 					possessProbZERO)) should be (true)
 
 
-			Logger.log("(F1, S2)", false)(
+			Logger.log("(F1, S2)")(false)(
 				("Prior probability of possession at t = 5", possessProbPrior)
 			)
-			Logger.log("(F1, S2)", false)(
+			Logger.log("(F1, S2)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 2", possessProbTWO)
 			)
-			Logger.log("(F1, S2)", false)(
+			Logger.log("(F1, S2)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 3,2", possessProbTHREE)
 			)
-			Logger.log("(F1, S2)", false)(
+			Logger.log("(F1, S2)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 0,3,2", possessProbZERO)
 			)
-			Logger.log("(F1, S2)", false)(
+			Logger.log("(F1, S2)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 1,0,3,2", possessProbONE)
 			)
 
@@ -277,22 +277,22 @@ class MarkovChainSoccerSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 
 
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Prior probability of possession at t = 5", possessProbPrior)
 			)
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 4", possessProbFOUR)
 			)
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 1,4", possessProbONE)
 			)
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 3,4", possessProbTHREE)
 			)
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 0,4", possessProbZERO)
 			)
-			Logger.log("(F2, S1)", false)(
+			Logger.log("(F2, S1)")(false)(
 				("Probability of possession at t = 5 | observe possession at t = 2,4", possessProbTWO)
 			)
 		}

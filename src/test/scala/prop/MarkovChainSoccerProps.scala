@@ -21,13 +21,24 @@ import com.cra.figaro.language.Element
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
+import org.scalatest.matchers.should.Matchers
+
 /**
  *
  */
+//RULES of specs2's pp function:
+
+// 1) if the result of the value being tested as "value.pp" is FALSE then
+// eventually the tests stop running, and throw an exception. Stacks do not overlap, so no worries
+// about tests running into each other.
+// 2) my rule: use .pp for counter printing and use Logger for grouping several statements and for the
+// DSL name "logging", since .pp is mostly specs2 testing
+// 3) use .pp to scatter print statements inside the property WHEN DEBUGGING not for LOGGING (so my
+//  logging DSL remains and I can additionally use .pp simultaneously in CHECK the verity of a certain
+//  statement at a particular POINT.
 
 
-
-object MarkovChainSoccerProps {
+object MarkovChainSoccerProps extends Matchers with Debug {
 
 
 	type DiscreteTime = Int
@@ -221,7 +232,10 @@ object MarkovChainSoccerProps {
 
 		(currentTime: Int, haveBall: Boolean) =>
 
-			Console.println()
+
+			Logger.log()()(("\n---------------- ITERATION", counter))
+
+
 
 			var haveObservedImmediatePast: Boolean = false
 
@@ -272,15 +286,17 @@ object MarkovChainSoccerProps {
 
 				// LOGGING
 				if(haveObservedImmediatePast) {
-					Logger.log("(F2, S1)")(false)(
+					Logger.log()(false)(
 						((s"Probability of possession at t = $currentTime " +
 							s"| observe possession at t = $time, ${currentTime - 1}",	possessProb))
 					)
+
 				} else {
-					Logger.log("(F2, S1)")(false)(
+					Logger.log()(false)(
 						((s"Probability of possession at t = $currentTime " +
 							s"| observe possession at t = $time",	possessProb))
 					)
+
 				}
 
 			}
@@ -348,11 +364,20 @@ object MarkovChainSoccerProps {
 			val areMarkovsEqual: Boolean = equalWithTolerance(markovProbs:_*)
 
 
-			Logger.log(tag = "(F2, S1)")()(
+
+
+			Logger.log()()(
 				("timeProbPairs", timeProbPairs),
 				("areNonMarkovsDifferent", areNonMarkovsDifferent),
 				("areMarkovsEqual", areMarkovsEqual)
 			)
+
+
+
+			//counter.pp("---------------- END OF ITERATION = ")
+			Logger.log()()(("---------------- END OF ITERATION", counter))
+			counter += 1
+
 
 			arePriorAndObservedProbsPairwiseDifferent &&
 				areNonMarkovsDifferent &&
