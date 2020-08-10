@@ -26,6 +26,16 @@ class MarkovSoccerChainSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 	import utils.Tester._
 
 
+
+
+	// Declaring some variables as state for below tests:
+
+	val CURRENT_TIME: Int = 5
+	val IMMEDIATE_PAST: Int = 4
+	val EARLIER_PASTS: List[Int] = (0 to IMMEDIATE_PAST).toList
+
+	
+
 	info("Markov Assumption Test for Non-Immediate Past: ")
 	info("Probability of possession at current time (t = 5)")
 	info("is independent of")
@@ -305,18 +315,15 @@ class MarkovSoccerChainSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 
 		// DEPENDENT + FOUR
 
-		val CURRENT_TIME: Int = 5
-		val IMMEDIATE_PAST: Int = 4
-		val EARLIER_PASTS: List[Int] = List(0, 1, 2, 3)
-
 
 		Scenario(s"Markov Assumption applies: " +
-			s"Given observed possession at t = 4, new CUMULATIVE observations of possession at t = 4, 3, 2, 1, 0 " +
+			s"Given observed possession at t = $IMMEDIATE_PAST, new CUMULATIVE observations of possession at " +
+			s"t = $IMMEDIATE_PAST, ${EARLIER_PASTS.mkString(", ")} " +
 			s"do not change the probability of possession at t = $CURRENT_TIME. " +
-			s"Markov assumption implies that probability of possession at t = 5 is INDEPENDENT of probability of " +
-			s"possession at t = 4, 3, 2, 1, 0, " +
+			s"Markov assumption implies that probability of possession at t = $CURRENT_TIME is INDEPENDENT of " +
+			s"probability of possession at t = $IMMEDIATE_PAST, ${EARLIER_PASTS.mkString(", ")}, " +
 			s"when using dependent observations, " +
-			s"given observed possession at t = 4. ")  {
+			s"given observed possession at t = $IMMEDIATE_PAST. ")  {
 
 
 			val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
@@ -326,6 +333,7 @@ class MarkovSoccerChainSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			Given("observe ball possession at t = 4")
 			possessionVar(4).observe(true)
 			val possessProbFOUR: Double = VariableElimination.probability(possessionVar(5), true)
+
 
 
 			When("observe ball possession at earlier times (t = 3, 2, 1, 0...) in a DEPENDENT way ...")
