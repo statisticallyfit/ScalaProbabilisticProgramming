@@ -9,7 +9,7 @@ import com.cra.figaro.library.compound.If
 /**
  * Source: from Avi Pfeffer book
  */
-object Listing_8_1_MarkovChainSoccer {
+object Listing_8_1_MarkovChain {
 
 
 	var CHAIN_LENGTH: Int = 90
@@ -20,7 +20,7 @@ object Listing_8_1_MarkovChainSoccer {
 	 * @param length length of the markov chain in discrete time steps
 	 * @return
 	 */
-	def createMarkovSoccerChain(length: Int ): Array[Element[Boolean]] = {
+	def createMarkovChain(length: Int ): Array[Element[Boolean]] = {
 
 		/**
 		 * (key concept) Markov Chain = https://synergo.atlassian.net/wiki/spaces/KnowRes/pages/2028044306/Markov+model
@@ -28,11 +28,11 @@ object Listing_8_1_MarkovChainSoccer {
 		 * Is the boolean state variable Possession, which has time states, and indicates whether your team has
 		 * possession of the soccer ball, for ever ytime point from 0 through 89.
 		 */
-		val possessionVar: Array[Element[Boolean]] = Array.fill(length)(Constant(false))
+		val markovRandomVariable: Array[Element[Boolean]] = Array.fill(length)(Constant(false))
 
 		// Sets the distribution of the initial state of the sequence.
 		// Distribution over whether your team has possession at time point 0.
-		possessionVar(0) = Flip(0.5)
+		markovRandomVariable(0) = Flip(0.5)
 
 
 		/**
@@ -44,24 +44,24 @@ object Listing_8_1_MarkovChainSoccer {
 		 * 0.6, but if you  didn't have possession, you have possession at next time step only with a lower probability of 0.3
 		 */
 		for {minute <- 1 until length} {
-			possessionVar(minute) = If(test = possessionVar(minute - 1), thn = Flip(0.6), els = Flip(0.3))
+			markovRandomVariable(minute) = If(test = markovRandomVariable(minute - 1), thn = Flip(0.6), els = Flip(0.3))
 		}
 
-		possessionVar
+		markovRandomVariable
 	}
 
 }
 
-object Listing_8_1_Runner extends App {
+object Listing_8_1_MarkovSoccerChainRunner extends App {
 
-	import Listing_8_1_MarkovChainSoccer._
+	import Listing_8_1_MarkovChain._
 
 
 	// GOAL: querying the markov model for the probability distribution over the state variable Possession at
 	// any time point, given observations at any time points.
 
 
-	val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+	val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 
 	/**

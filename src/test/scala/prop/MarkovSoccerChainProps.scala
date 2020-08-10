@@ -10,7 +10,7 @@ import Arbitrary.arbitrary
 import org.specs2.control.Debug
 
 
-import MarkovChain.Listing_8_1_MarkovChainSoccer._
+import MarkovChain.Listing_8_1_MarkovChain._
 import utils._
 import utils.Tester._
 
@@ -38,7 +38,7 @@ import org.scalatest.matchers.should.Matchers
 //  statement at a particular POINT.
 
 
-object MarkovChainSoccerProps extends Matchers with Debug {
+object MarkovSoccerChainProps extends Matchers with Debug {
 
 
 	type DiscreteTime = Int
@@ -86,7 +86,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
@@ -130,7 +130,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			var possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			var possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
@@ -161,7 +161,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 			}
 
 			// Refresh markov chain
-			possessionVar = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			possessionVar = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Way 2 to observe evidence: decreasing and in order: (time is reversed)
 			for { time <- exclusivePastTimes.reverse } {
@@ -177,7 +177,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 
 
 			// Refresh markov chain
-			possessionVar = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			possessionVar = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Way 3 to observe evidence: random order
 			import scala.util.Random
@@ -242,7 +242,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
@@ -395,7 +395,7 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 
 			// Create the markov chain
 			// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-			val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+			val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 			// Create list to store the observed probabilities of soccer ball possession at current time, after
 			// observations
@@ -466,9 +466,9 @@ object MarkovChainSoccerProps extends Matchers with Debug {
 }
 
 
-object CheckMarkovChainSoccerProps extends Properties("MarkovAssumption") {
+object MarkovSoccerChainPropertyChecker extends Properties("MarkovAssumption") {
 
-	import MarkovChainSoccerProps._
+	import MarkovSoccerChainProps._
 
 	// TESTING //testExclSeparObservations.check()
 	// TESTING //testExclCumulObservations.check()
@@ -515,7 +515,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 	 * holds even when switching up the order of the observed probabilities.
 	 */
 
-	import MarkovChainSoccerProps._
+	import MarkovSoccerChainProps._
 
 
 	var counter = 0
@@ -536,7 +536,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 		// Create the markov chain
 		// length CHAIN_LENGTH, from 0 ... CHAIN_LENGTh-1
-		val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		// Create list to store the observed probabilities of soccer ball possession at current time, after
 		// observations
@@ -592,7 +592,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 		println("\n Testing manually 1")
 
-		val possessionVar: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar(3).observe(haveBall)
 		val possessProbTHREE: Double = VariableElimination.probability(possessionVar(currentTime), true)
@@ -610,7 +610,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		// ----------------------------
 		println("\n Testing manually 2")
 
-		val possessionVar2: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar2: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar2(1).observe(haveBall)
 		val possessProbONE2: Double = VariableElimination.probability(possessionVar2(currentTime), true)
@@ -631,7 +631,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		// ----------------------------
 		println("\n Testing manually 3")
 
-		val possessionVar3: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar3: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar3(0).observe(haveBall)
 		val possessProbZERO3: Double = VariableElimination.probability(possessionVar3(currentTime), true)
@@ -650,7 +650,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 
 		println("\n Testing manually 4")
 
-		val possessionVar4: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar4: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar4(3).observe(false)
 		val possessProbTHREE4: Double = VariableElimination.probability(possessionVar4(currentTime), true)
@@ -670,7 +670,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		// ----------------------------
 		println("\n Testing manually 5")
 
-		val possessionVar5: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar5: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar5(1).observe(false)
 		val possessProbONE5: Double = VariableElimination.probability(possessionVar5(currentTime), true)
@@ -691,7 +691,7 @@ object TEMP_VerifyMarkovHoldsInAnyOrderOfObservation { //extends Properties("Mar
 		// ----------------------------
 		println("\n Testing manually 6")
 
-		val possessionVar6: Array[Element[Boolean]] = createMarkovSoccerChain(length = CHAIN_LENGTH)
+		val possessionVar6: Array[Element[Boolean]] = createMarkovChain(length = CHAIN_LENGTH)
 
 		possessionVar6(0).observe(false)
 		val possessProbZERO6: Double = VariableElimination.probability(possessionVar6(currentTime), true)
