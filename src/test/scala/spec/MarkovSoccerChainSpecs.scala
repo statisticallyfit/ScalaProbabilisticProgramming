@@ -111,7 +111,8 @@ class MarkovSoccerChainSpecs extends AnyFeatureSpec with Matchers with GivenWhen
 			(notAllSame(possessProbTHREE,
 				possessProbTWO,
 				possessProbONE,
-				possessProbZERO) ||
+				possessProbZERO)
+				||
 				notAllSameWithTolerance(possessProbTHREE,
 					possessProbTWO,
 					possessProbONE,
