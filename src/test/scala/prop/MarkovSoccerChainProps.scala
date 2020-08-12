@@ -182,9 +182,9 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 			// Way 3 to observe evidence: random order
 			import scala.util.Random
 
-			val randTimes = Random.shuffle(exclusivePastTimes)
+			val shuffledTimes = Random.shuffle(exclusivePastTimes)
 
-			for { time <- randTimes } {
+			for { time <- shuffledTimes } {
 
 				possessionVar(time).observe(haveBall)
 
@@ -228,16 +228,20 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 	// Test: inclusive / immediate time past (<= currentTime - 1)
 
-	val testInclusiveIndependentObservationsObeyMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
+	val testINClusiveINDependentObservationsObeyMarkovAssumption = forAll(genCurrentTime, genHaveBall) {
 
 		(currentTime: Int, haveBall: Boolean) =>
 
 
+			// Declaring some variables as state for below tests:
+
+			//val CURRENT_TIME: Int = 5
+			val immediatePast: Int = currentTime - 1
+			val earlierPasts: List[Int] = (0 to immediatePast).toList
+
+
+
 			Logger.log()()(("\n---------------- ITERATION", counter))
-
-
-
-			var haveObservedImmediatePast: Boolean = false
 
 
 			// Create the markov chain
@@ -253,7 +257,7 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 			// Create list of points in time such that they are less than current time (so in the past) but also
 			// strictly less than the current time (so 0,1,2,3 for currtime = 5)
-			val inclusivePastTimes: Seq[DiscreteTime] = (0 to (currentTime - 1)) //inclusive endpoint
+			val inclusivePastTimes: Seq[DiscreteTime] = earlierPasts //(0 to (currentTime - 1)) //inclusive endpoint
 
 
 			// Get the prior probability of possession (must do this BEFORE doing observations in for loop below)
@@ -262,9 +266,9 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 
 			// Shuffle the times so we can observe the ball posession at random order of times.
-			val randTimes = Random.shuffle(inclusivePastTimes)
+			val shuffledTimes = Random.shuffle(inclusivePastTimes)
 
-			for { time <- randTimes } {
+			for { time <- shuffledTimes } {
 
 				possessionVar(time).observe(haveBall)
 
@@ -274,18 +278,18 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 				// If the time right now (rand) is the immediately previous time after CURRENT TIME then do not
 				// unobserve, we need to keep it as the inclusive endpoint here:
-				if(time != currentTime - 1){
+				/*if(time != currentTime - 1){
 					possessionVar(time).unobserve() // the separate / non-cumulative aspect
 				}
 				if(time == currentTime - 1){
 					haveObservedImmediatePast = true
-				}
+				}*/
 
 				probsList += possessProb
 
 
 				// LOGGING
-				if(haveObservedImmediatePast) {
+				/*if(haveObservedImmediatePast) {
 					Logger.log()(false)(
 						((s"Probability of possession at t = $currentTime " +
 							s"| observe possession at t = $time, ${currentTime - 1}",	possessProb))
@@ -297,75 +301,59 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 							s"| observe possession at t = $time",	possessProb))
 					)
 
-				}
+				}*/
 
 			}
 
-			val timeProbPairs: List[(DiscreteTime, Probability)] = randTimes.zip(probsList).toList
-
-
-
-			/*// Test 1: check that all the probabilities are not really equal to each other (either some different
-			// (>= 1 differs) or not all same (<= NUM differs)
-			val arePriorAndObservedProbsPairwiseDifferent: Boolean =
-				probsList.forall(obsProb => notAllSame(obsProb, priorProb) || notAllSameWithTolerance(obsProb, priorProb))
-
-			// Test 2: check at least one pair of observed probs is different from the other.
-			val areObsProbsNotAllSame: Boolean = notAllSame(probsList:_*)
-			// Test 3: check at least one pair of observed probs is different from each other.
-			val areObsProbsNotAllSameWithTol = notAllSameWithTolerance(probsList:_*)
-
-			val notEqualWithTolerance = if(probsList.length == 1) true else ! equalWithTolerance(probsList:_*)
-
-
-
-
-			// Test 3: assert not all pairwise equal (with tolerance)
-
-			/*arePriorAndObservedProbsPairwiseDifferent &&
-				(notAllSame(probsList:_*) || notAllSameWithTolerance(probsList:_*)) &&
-				! equalWithTolerance(probsList:_* )*/
-
-			Logger.log(tag = "(F2, S1)")()(
-				("probsList", probsList),
-				("arePairwiseDiff", arePriorAndObservedProbsPairwiseDifferent),
-				("areNotAllSame", areObsProbsNotAllSame),
-				("areNotAllSameWithTolerance", areObsProbsNotAllSameWithTol),
-				("notEqual", notEqualWithTolerance)
-			)
-
-			arePriorAndObservedProbsPairwiseDifferent &&
-				(areObsProbsNotAllSame || areObsProbsNotAllSameWithTol) &&
-			 	notEqualWithTolerance*/
+			val timeProbPairs: List[(DiscreteTime, Probability)] = shuffledTimes.zip(probsList).toList
 
 
 			// TESTING
 
-			// Test 1: check the prior prob is not the same with EACH of the other possession probs
+			// Testing 1: check the prior prob is not the same with EACH of the other possession probs
 			val arePriorAndObservedProbsPairwiseDifferent: Boolean =
 				probsList.forall(obsProb => notAllSame(obsProb, priorProb) || notAllSameWithTolerance(obsProb, priorProb))
 
 
-			// Test 2: assert that all the observations made before currentime will be different (not all same)
-			val nonMarkovProbs: List[Probability] = timeProbPairs
-				.takeWhile{case (time, prob) => time != currentTime - 1}
-				.map(_._2) // get just probabilities where time is not the current - 1
+			// Testing 2: assert that all the observations made before currentime will be different (not all same)
+			val nonMarkovTimeProbs: List[(DiscreteTime, Probability)] = timeProbPairs
+				.takeWhile{case (time, prob) => time != immediatePast}
 
-			val markovProbs: List[Probability] = timeProbPairs
-				.dropWhile { case (time, prob) => time != currentTime - 1}
-				.map(_._2)
+
+			val nonMarkovProbs: List[Probability] = nonMarkovTimeProbs.map(_._2)
+
+			val markovTimeProbs: List[(DiscreteTime, Probability)] = timeProbPairs
+				.dropWhile { case (time, prob) => time != immediatePast } // next after dropped was observed at
+			// immediate past
+
+			val markovProbs: List[Probability] = markovTimeProbs.map(_._2)
 
 
 			val areNonMarkovsDifferent: Boolean =
 				notAllSame(nonMarkovProbs:_*) || notAllSameWithTolerance(nonMarkovProbs:_*)
 
 
-			// Test 3: assert that all observations made after the immediate time after current will have same
+			// Testing 3: assert that all observations made after the immediate time after current will have same
 			val areMarkovsEqual: Boolean = equalWithTolerance(markovProbs:_*)
 
 
+			// LOGGING
 
+			// Logging where the non-markov probabilities are (before observing at immediate past)
+			nonMarkovTimeProbs.foreach{
+				case (time, prob) =>
+					Logger.log()(false)((s"Probability of possession at t = $currentTime " +
+						s"| observe possession at t = $time", prob) )
+			}
 
+			// Logging where the markov probabilities are (after an on observing at immediate past)
+			markovTimeProbs.foreach{
+				case (time, prob) =>
+					Logger.log()(false)((s"Probability of possession at t = $currentTime " +
+						s"| observe possession at t = $time, $immediatePast", prob) )
+			}
+
+			// Logging the results of the tests
 			Logger.log()()(
 				("timeProbPairs", timeProbPairs),
 				("areNonMarkovsDifferent", areNonMarkovsDifferent),
@@ -374,7 +362,6 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 
 
-			//counter.pp("---------------- END OF ITERATION = ")
 			Logger.log()()(("---------------- END OF ITERATION", counter))
 			counter += 1
 
@@ -414,9 +401,9 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 
 
 			// Shuffle the times so we can observe the ball posession at random order of times.
-			val randTimes = Random.shuffle(inclusivePastTimes)
+			val shuffledTimes = Random.shuffle(inclusivePastTimes)
 
-			for { time <- randTimes } {
+			for { time <- shuffledTimes } {
 
 				possessionVar(time).observe(haveBall)
 
@@ -426,7 +413,7 @@ object MarkovSoccerChainProps extends Matchers with Debug {
 				probsList += possessProb // (time, possessProb)
 			}
 
-			val timeProbPairs: List[(DiscreteTime, Probability)] = randTimes.zip(probsList).toList
+			val timeProbPairs: List[(DiscreteTime, Probability)] = shuffledTimes.zip(probsList).toList
 
 
 
@@ -476,7 +463,7 @@ object MarkovSoccerChainPropertyChecker extends Properties("MarkovAssumption") {
 	// DONE//testInclCumulObservations.check()
 
 	// TESTING
-	testInclusiveIndependentObservationsObeyMarkovAssumption.check()
+	testINClusiveINDependentObservationsObeyMarkovAssumption.check()
 
 	//NOTES:
 	// 1) markov chain (curr time) needs to be longer for us to see BIG ENOUGH differences in the numbers when not
