@@ -65,6 +65,8 @@ lazy val global = project
 			allDependencies.rainier_sampler,
 			allDependencies.rainier_scalacheck,
 
+			allDependencies.probabilityMonad,
+
 			allDependencies.evilplot,
 
 			allDependencies.bayesScala
@@ -116,6 +118,8 @@ lazy val allDependencies =
 		val versionOfFigaro = "5.0.0.0"
 
 		val versionOfRainier = "0.3.0"
+
+		val versionOfProbabilityMonad = "1.0.3"
 
 		val versionOfBayesScala = "0.6" // "0.7-SNAPSHOT"
 
@@ -178,6 +182,8 @@ lazy val allDependencies =
 		val evilplot = "com.cibo" %% "evilplot" % versionOfEvilPlot
 
 		val bayesScala = "com.github.danielkorzekwa" %% "bayes-scala" % versionOfBayesScala
+
+		val probabilityMonad = "org.jliszka" %% "probability-monad" % versionOfProbabilityMonad
 
 		val breeze = "org.scalanlp" %% "breeze" % versionOfBreeze
 		val breeze_natives = "org.scalanlp" %% "breeze-natives" % versionOfBreeze

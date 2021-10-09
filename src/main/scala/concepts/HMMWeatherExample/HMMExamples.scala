@@ -1,4 +1,4 @@
-package HiddenMarkovModel.HMMWeatherExample
+package concepts.HMMWeatherExample
 
 
 import HMMTypes._

@@ -2,7 +2,7 @@ package prop
 
 
 
-import MarkovChain.Listing_8_1_MarkovChain._
+import tutorials.MarkovChain.Listing_8_1_MarkovChain._
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language.Element

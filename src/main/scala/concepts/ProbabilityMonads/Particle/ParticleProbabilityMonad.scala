@@ -1,4 +1,4 @@
-package blogs.Blog_DarrenWilkinson.Particle
+package concepts.ProbabilityMonads.Particle
 
 
 import breeze.stats.{distributions => bdist}

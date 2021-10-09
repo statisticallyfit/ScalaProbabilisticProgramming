@@ -1,4 +1,4 @@
-package ProbabilityMonads.Particle
+package concepts.ProbabilityMonads.Particle
 
 /**
  *

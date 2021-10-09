@@ -22,7 +22,7 @@ import utils._
 class MarkovSoccerChainSpecs extends AnyFeatureSpec with Matchers with GivenWhenThen {
 
 
-	import MarkovChain.Listing_8_1_MarkovChain._
+	import tutorials.MarkovChain.Listing_8_1_MarkovChain._
 	import utils.Tester._
 
 

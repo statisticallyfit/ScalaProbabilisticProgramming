@@ -1,4 +1,4 @@
-package HiddenMarkovModel.HMMSoccerExample
+package tutorials.HMMSoccerExample
 
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.language.{Constant, Element, Flip}

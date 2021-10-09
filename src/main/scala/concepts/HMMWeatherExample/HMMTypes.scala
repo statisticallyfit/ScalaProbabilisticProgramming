@@ -1,4 +1,4 @@
-package HiddenMarkovModel.HMMWeatherExample
+package concepts.HMMWeatherExample
 
 /**
  * Tutorial source = https://mioalter.wordpress.com/2016/02/13/hmm-hidden-markov-models-with-figaro/
